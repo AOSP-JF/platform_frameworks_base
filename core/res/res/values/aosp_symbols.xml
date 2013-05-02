@@ -121,4 +121,8 @@
     <!-- lockscreen Wallpaper -->
     <java-symbol type="anim" name="lock_screen_wallpaper_exit_noop" />
 
+    <!-- Support Samsung docks -->
+    <java-symbol type="bool" name="config_forceAnalogCarDock" />
+    <java-symbol type="bool" name="config_forceAnalogDeskDock" />
+
 </resources>
