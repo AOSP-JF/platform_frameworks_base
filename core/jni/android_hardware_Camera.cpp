@@ -495,6 +495,21 @@ static void android_hardware_Camera_setLongshot(JNIEnv *env, jobject thiz, jbool
     }
 }
 
+static void android_hardware_Camera_stopLongshot(JNIEnv *env, jobject thiz)
+{
+    ALOGV("stopLongshot");
+    JNICameraContext* context;
+    status_t rc;
+    sp<Camera> camera = get_native_camera(env, thiz, &context);
+    if (camera == 0) return;
+
+    rc = camera->sendCommand(CAMERA_CMD_STOP_LONGSHOT, 0, 0);
+
+    if (rc != NO_ERROR) {
+       jniThrowException(env, "java/lang/RuntimeException", "enabling longshot mode failed");
+    }
+}
+
 static void android_hardware_Camera_sendHistogramData(JNIEnv *env, jobject thiz)
  {
    ALOGV("sendHistogramData" );
@@ -609,10 +624,10 @@ static jint android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz,
     jobject weak_this, jint cameraId, jint halVersion, jstring clientPackageName)
 {
     // Convert jstring to String16
-    const char16_t *rawClientName = (char16_t*)env->GetStringChars(clientPackageName, NULL);
+    const char16_t *rawClientName = env->GetStringChars(clientPackageName, NULL);
     jsize rawClientNameLen = env->GetStringLength(clientPackageName);
     String16 clientName(rawClientName, rawClientNameLen);
-    env->ReleaseStringChars(clientPackageName, (jchar*)rawClientName);
+    env->ReleaseStringChars(clientPackageName, rawClientName);
 
     sp<Camera> camera;
     if (halVersion == CAMERA_HAL_API_VERSION_NORMAL_CONNECT) {
@@ -1117,9 +1132,12 @@ static JNINativeMethod camMethods[] = {
   { "native_sendHistogramData",
     "()V",
      (void *)android_hardware_Camera_sendHistogramData },
- { "native_setLongshot",
-     "(Z)V",
-      (void *)android_hardware_Camera_setLongshot },
+  { "native_setLongshot",
+    "(Z)V",
+     (void *)android_hardware_Camera_setLongshot },
+  { "native_stopLongshot",
+    "()V",
+     (void *)android_hardware_Camera_stopLongshot },
   { "native_setParameters",
     "(Ljava/lang/String;)V",
     (void *)android_hardware_Camera_setParameters },

@@ -245,11 +245,7 @@ public class Camera {
      * If {@link #getNumberOfCameras()} returns N, the valid id is 0 to N-1.
      */
     public static void getCameraInfo(int cameraId, CameraInfo cameraInfo) {
-        try {
-            _getCameraInfo(cameraId, cameraInfo);
-        } catch (RuntimeException e) {
-            Log.e(TAG, "Lock screen is disabled, facelock can't get camera info");
-        }
+        _getCameraInfo(cameraId, cameraInfo);
         IBinder b = ServiceManager.getService(Context.AUDIO_SERVICE);
         IAudioService audioService = IAudioService.Stub.asInterface(b);
         try {
@@ -2115,6 +2111,15 @@ public class Camera {
         native_setLongshot(enable);
     }
     private native final void native_setLongshot(boolean enable);
+
+    /** @hide
+     * Stop longshot. Available only in ZSL.
+     */
+    public final void stopLongshot()
+    {
+        native_stopLongshot();
+    }
+    private native final void native_stopLongshot();
 
      /** @hide
      * Handles the Touch Co-ordinate.
