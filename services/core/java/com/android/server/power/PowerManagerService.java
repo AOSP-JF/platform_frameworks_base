@@ -151,6 +151,9 @@ public final class PowerManagerService extends SystemService
     // Button backlight duration
     private static final int DEFAULT_BUTTON_ON_DURATION = 5 * 1000;
 
+    // Max time (microseconds) to allow a CPU boost for
+    private static final int MAX_CPU_BOOST_TIME = 5000000;
+
     private final Context mContext;
     private final ServiceThread mHandlerThread;
     private final PowerManagerHandler mHandler;
@@ -445,6 +448,7 @@ public final class PowerManagerService extends SystemService
     private static native void nativeSetInteractive(boolean enable);
     private static native void nativeSetAutoSuspend(boolean enable);
     private static native void nativeSendPowerHint(int hintId, int data);
+    private static native void nativeCpuBoost(int duration);
 
     public PowerManagerService(Context context) {
         super(context);
@@ -3078,6 +3082,21 @@ public final class PowerManagerService extends SystemService
                 Binder.restoreCallingIdentity(ident);
             }
         }
+
+        /**
+         * Boost the CPU
+         * @param duration Duration to boost the CPU for, in milliseconds.
+         * @hide
+         */
+        @Override
+        public void cpuBoost(int duration) {
+            if (duration > 0 && duration <= MAX_CPU_BOOST_TIME) {
+                nativeCpuBoost(duration);
+            } else {
+                Log.e(TAG, "Invalid boost duration: " + duration);
+            }
+        }
+
 
         /**
          * Reboots the device.
