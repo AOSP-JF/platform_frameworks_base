@@ -118,4 +118,7 @@
     <java-symbol type="string" name="lockscreen_sim_puk_locked_message" />
     <java-symbol type="string" name="lockscreen_airplane_mode_on" />
     
+    <!-- lockscreen Wallpaper -->
+    <java-symbol type="anim" name="lock_screen_wallpaper_exit_noop" />
+
 </resources>
