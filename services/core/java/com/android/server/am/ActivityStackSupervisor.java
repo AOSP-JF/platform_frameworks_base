@@ -234,7 +234,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     /** Indicates if we are running on a Leanback-only (TV) device. Only initialized after
      * setWindowManager is called. **/
     private boolean mLeanbackOnlyDevice;
-
+    
     PowerManager mPm;
 
     /**
