@@ -57,6 +57,7 @@
                       android:layout_height="?android:attr/listPreferredItemHeight"
                       android:layout_marginStart="16dp"
                       android:textAppearance="?android:attr/textAppearanceMedium"
+                      android:textColor="?attr/textColorPrimary"
                       android:gravity="start|center_vertical"
                       android:paddingEnd="16dp" />
             <LinearLayout android:id="@+id/profile_button"
