@@ -406,6 +406,7 @@ CREATE_BRIDGE2(outputLogBuffer, int fd, RenderThread* thread) {
 }
 
 void RenderProxy::outputLogBuffer(int fd) {
+    if (!RenderThread::hasInstance()) return;
     SETUP_TASK(outputLogBuffer);
     args->fd = fd;
     args->thread = &RenderThread::getInstance();
