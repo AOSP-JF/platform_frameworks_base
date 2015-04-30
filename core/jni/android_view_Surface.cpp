@@ -192,6 +192,27 @@ static inline SkColorType convertPixelFormat(PixelFormat format) {
     }
 }
 
+static void nativeSetDirtyRect(JNIEnv* env, jclass clazz,
+        jlong nativeObject, jobject dirtyRect) {
+
+#ifdef QCOM_BSP
+    sp<Surface> surface(reinterpret_cast<Surface *>(nativeObject));
+
+    if (!isSurfaceValid(surface)) {
+        doThrowIAE(env);
+        return;
+    }
+
+    Rect rect;
+    rect.left = env->GetIntField(dirtyRect, gRectClassInfo.left);
+    rect.top = env->GetIntField(dirtyRect, gRectClassInfo.top);
+    rect.right = env->GetIntField(dirtyRect, gRectClassInfo.right);
+    rect.bottom = env->GetIntField(dirtyRect, gRectClassInfo.bottom);
+
+    surface->setDirtyRect(&rect);
+#endif
+}
+
 static jlong nativeLockCanvas(JNIEnv* env, jclass clazz,
         jlong nativeObject, jobject canvasObj, jobject dirtyRectObj) {
     sp<Surface> surface(reinterpret_cast<Surface *>(nativeObject));

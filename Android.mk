@@ -389,7 +389,7 @@ LOCAL_SRC_FILES += \
 	packages/services/PacProcessor/com/android/net/IProxyService.aidl \
 	packages/services/Proxy/com/android/net/IProxyCallback.aidl \
 	packages/services/Proxy/com/android/net/IProxyPortListener.aidl \
-
+	
 # FRAMEWORKS_BASE_JAVA_SRC_DIRS comes from build/core/pathmap.mk
 LOCAL_AIDL_INCLUDES += $(FRAMEWORKS_BASE_JAVA_SRC_DIRS)
 
