@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package android.app;
-
 import android.annotation.SystemApi;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
@@ -29,14 +27,11 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.ArrayMap;
-
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 /**
  * API for interacting with "application operation" tracking.
  *
@@ -67,47 +62,39 @@ public class AppOpsManager {
      * MODE_ERRORED (throw a SecurityException back to the caller; the normal operation calls
      * will do this for you).
      */
-
     final Context mContext;
     final IAppOpsService mService;
     final ArrayMap<OnOpChangedListener, IAppOpsCallback> mModeWatchers
             = new ArrayMap<OnOpChangedListener, IAppOpsCallback>();
-
     static IBinder sToken;
-
     /**
      * Result from {@link #checkOp}, {@link #noteOp}, {@link #startOp}: the given caller is
      * allowed to perform the given operation.
      */
     public static final int MODE_ALLOWED = 0;
-
     /**
      * Result from {@link #checkOp}, {@link #noteOp}, {@link #startOp}: the given caller is
      * not allowed to perform the given operation, and this attempt should
      * <em>silently fail</em> (it should not cause the app to crash).
      */
     public static final int MODE_IGNORED = 1;
-
     /**
      * Result from {@link #checkOpNoThrow}, {@link #noteOpNoThrow}, {@link #startOpNoThrow}: the
      * given caller is not allowed to perform the given operation, and this attempt should
      * cause it to have a fatal error, typically a {@link SecurityException}.
      */
     public static final int MODE_ERRORED = 2;
-
     /**
      * Result from {@link #checkOp}, {@link #noteOp}, {@link #startOp}: the given caller should
      * use its default security check.  This mode is not normally used; it should only be used
      * with appop permissions, and callers must explicitly check for it and deal with it.
      */
     public static final int MODE_DEFAULT = 3;
-
     // when adding one of these:
     //  - increment _NUM_OP
     //  - add rows to sOpToSwitch, sOpToString, sOpNames, sOpPerms, sOpDefaultMode
     //  - add descriptive strings to Settings/res/values/arrays.xml
     //  - add the op to the appropriate template in AppOpsState.OpsTemplate (settings app)
-
     /** @hide No operation specified. */
     public static final int OP_NONE = -1;
     /** @hide Access to coarse location information. */
@@ -208,7 +195,6 @@ public class AppOpsManager {
     public static final int OP_ACTIVATE_VPN = 47;
     /** @hide */
     public static final int _NUM_OP = 48;
-
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION =
             "android:coarse_location";
@@ -227,7 +213,6 @@ public class AppOpsManager {
     /** Activate a VPN connection without user intervention. @hide */
     @SystemApi
     public static final String OPSTR_ACTIVATE_VPN = "android:activate_vpn";
-
     /**
      * This maps each operation to the operation that serves as the
      * switch to determine whether it is allowed.  Generally this is
@@ -286,7 +271,6 @@ public class AppOpsManager {
             OP_PROJECT_MEDIA,
             OP_ACTIVATE_VPN,
     };
-
     /**
      * This maps each operation to the public string constant for it.
      * If it doesn't have a public string constant, it maps to null.
@@ -341,7 +325,6 @@ public class AppOpsManager {
             null,
             OPSTR_ACTIVATE_VPN,
     };
-
     /**
      * This provides a simple name for each operation to be used
      * in debug output.
@@ -396,7 +379,6 @@ public class AppOpsManager {
             "PROJECT_MEDIA",
             "ACTIVATE_VPN",
     };
-
     /**
      * This optionally maps a permission to an operation.  If there
      * is no permission associated with an operation, it is null.
@@ -451,7 +433,6 @@ public class AppOpsManager {
             null, // no permission for projecting media
             null, // no permission for activating vpn
     };
-
     /**
      * Specifies whether an Op should be restricted by a user restriction.
      * Each Op should be filled with a restriction string from UserManager or
@@ -507,7 +488,6 @@ public class AppOpsManager {
             null, //PROJECT_MEDIA
             UserManager.DISALLOW_CONFIG_VPN, // ACTIVATE_VPN
     };
-
     /**
      * This specifies whether each option should allow the system
      * (and system ui) to bypass the user restriction when active.
@@ -562,7 +542,6 @@ public class AppOpsManager {
             false, //PROJECT_MEDIA
             false, //ACTIVATE_VPN
     };
-
     /**
      * This specifies the default mode for each operation.
      */
@@ -616,7 +595,6 @@ public class AppOpsManager {
             AppOpsManager.MODE_IGNORED, // OP_PROJECT_MEDIA
             AppOpsManager.MODE_IGNORED, // OP_ACTIVATE_VPN
     };
-
     /**
      * This specifies whether each option is allowed to be reset
      * when resetting all app preferences.  Disable reset for
@@ -674,9 +652,7 @@ public class AppOpsManager {
             false,
             false,
     };
-
     private static HashMap<String, Integer> sOpStrToOp = new HashMap<String, Integer>();
-
     static {
         if (sOpToSwitch.length != _NUM_OP) {
             throw new IllegalStateException("sOpToSwitch length " + sOpToSwitch.length
@@ -716,7 +692,6 @@ public class AppOpsManager {
             }
         }
     }
-
     /**
      * Retrieve the op switch that controls the given operation.
      * @hide
@@ -724,7 +699,6 @@ public class AppOpsManager {
     public static int opToSwitch(int op) {
         return sOpToSwitch[op];
     }
-
     /**
      * Retrieve a non-localized name for the operation, for debugging output.
      * @hide
@@ -733,7 +707,6 @@ public class AppOpsManager {
         if (op == OP_NONE) return "NONE";
         return op < sOpNames.length ? sOpNames[op] : ("Unknown(" + op + ")");
     }
-
     /**
      * @hide
      */
@@ -745,7 +718,6 @@ public class AppOpsManager {
         }
         throw new IllegalArgumentException("Unknown operation string: " + op);
     }
-
     /**
      * Retrieve the permission associated with an operation, or null if there is not one.
      * @hide
@@ -753,7 +725,6 @@ public class AppOpsManager {
     public static String opToPermission(int op) {
         return sOpPerms[op];
     }
-
     /**
      * Retrieve the user restriction associated with an operation, or null if there is not one.
      * @hide
@@ -761,7 +732,6 @@ public class AppOpsManager {
     public static String opToRestriction(int op) {
         return sOpRestrictions[op];
     }
-
     /**
      * Retrieve whether the op allows the system (and system ui) to
      * bypass the user restriction.
@@ -770,7 +740,6 @@ public class AppOpsManager {
     public static boolean opAllowSystemBypassRestriction(int op) {
         return sOpAllowSystemRestrictionBypass[op];
     }
-
     /**
      * Retrieve the default mode for the operation.
      * @hide
@@ -778,7 +747,6 @@ public class AppOpsManager {
     public static int opToDefaultMode(int op) {
         return sOpDefaultMode[op];
     }
-
     /**
      * Retrieve whether the op allows itself to be reset.
      * @hide
@@ -786,7 +754,6 @@ public class AppOpsManager {
     public static boolean opAllowsReset(int op) {
         return !sOpDisableReset[op];
     }
-
     /**
      * Class holding all of the operation information associated with an app.
      * @hide
@@ -795,30 +762,24 @@ public class AppOpsManager {
         private final String mPackageName;
         private final int mUid;
         private final List<OpEntry> mEntries;
-
         public PackageOps(String packageName, int uid, List<OpEntry> entries) {
             mPackageName = packageName;
             mUid = uid;
             mEntries = entries;
         }
-
         public String getPackageName() {
             return mPackageName;
         }
-
         public int getUid() {
             return mUid;
         }
-
         public List<OpEntry> getOps() {
             return mEntries;
         }
-
         @Override
         public int describeContents() {
             return 0;
         }
-
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeString(mPackageName);
@@ -828,7 +789,6 @@ public class AppOpsManager {
                 mEntries.get(i).writeToParcel(dest, flags);
             }
         }
-
         PackageOps(Parcel source) {
             mPackageName = source.readString();
             mUid = source.readInt();
@@ -838,18 +798,15 @@ public class AppOpsManager {
                 mEntries.add(OpEntry.CREATOR.createFromParcel(source));
             }
         }
-
         public static final Creator<PackageOps> CREATOR = new Creator<PackageOps>() {
             @Override public PackageOps createFromParcel(Parcel source) {
                 return new PackageOps(source);
             }
-
             @Override public PackageOps[] newArray(int size) {
                 return new PackageOps[size];
             }
         };
     }
-
     /**
      * Class holding the information about one unique operation of an application.
      * @hide
@@ -860,7 +817,6 @@ public class AppOpsManager {
         private final long mTime;
         private final long mRejectTime;
         private final int mDuration;
-
         public OpEntry(int op, int mode, long time, long rejectTime, int duration) {
             mOp = op;
             mMode = mode;
@@ -868,36 +824,28 @@ public class AppOpsManager {
             mRejectTime = rejectTime;
             mDuration = duration;
         }
-
         public int getOp() {
             return mOp;
         }
-
         public int getMode() {
             return mMode;
         }
-
         public long getTime() {
             return mTime;
         }
-
         public long getRejectTime() {
             return mRejectTime;
         }
-
         public boolean isRunning() {
             return mDuration == -1;
         }
-
         public int getDuration() {
             return mDuration == -1 ? (int)(System.currentTimeMillis()-mTime) : mDuration;
         }
-
         @Override
         public int describeContents() {
             return 0;
         }
-
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(mOp);
@@ -906,7 +854,6 @@ public class AppOpsManager {
             dest.writeLong(mRejectTime);
             dest.writeInt(mDuration);
         }
-
         OpEntry(Parcel source) {
             mOp = source.readInt();
             mMode = source.readInt();
@@ -914,25 +861,21 @@ public class AppOpsManager {
             mRejectTime = source.readLong();
             mDuration = source.readInt();
         }
-
         public static final Creator<OpEntry> CREATOR = new Creator<OpEntry>() {
             @Override public OpEntry createFromParcel(Parcel source) {
                 return new OpEntry(source);
             }
-
             @Override public OpEntry[] newArray(int size) {
                 return new OpEntry[size];
             }
         };
     }
-
     /**
      * Callback for notification of changes to operation state.
      */
     public interface OnOpChangedListener {
         public void onOpChanged(String op, String packageName);
     }
-
     /**
      * Callback for notification of changes to operation state.
      * This allows you to see the raw op codes instead of strings.
@@ -942,12 +885,10 @@ public class AppOpsManager {
         public void onOpChanged(String op, String packageName) { }
         public void onOpChanged(int op, String packageName) { }
     }
-
     AppOpsManager(Context context, IAppOpsService service) {
         mContext = context;
         mService = service;
     }
-
     /**
      * Retrieve current operation state for all applications.
      *
@@ -961,7 +902,6 @@ public class AppOpsManager {
         }
         return null;
     }
-
     /**
      * Retrieve current operation state for one application.
      *
@@ -977,7 +917,6 @@ public class AppOpsManager {
         }
         return null;
     }
-
     /** @hide */
     public void setMode(int code, int uid, String packageName, int mode) {
         try {
@@ -985,7 +924,6 @@ public class AppOpsManager {
         } catch (RemoteException e) {
         }
     }
-
     /**
      * Set a non-persisted restriction on an audio operation at a stream-level.
      * Restrictions are temporary additional constraints imposed on top of the persisted rules
@@ -1005,7 +943,6 @@ public class AppOpsManager {
         } catch (RemoteException e) {
         }
     }
-
     /** @hide */
     public void resetAllModes() {
         try {
@@ -1013,7 +950,6 @@ public class AppOpsManager {
         } catch (RemoteException e) {
         }
     }
-
     /**
      * Monitor for changes to the operating mode for the given op in the given app package.
      * @param op The operation to monitor, one of OPSTR_*.
@@ -1024,7 +960,6 @@ public class AppOpsManager {
             final OnOpChangedListener callback) {
         startWatchingMode(strOpToOp(op), packageName, callback);
     }
-
     /**
      * Monitor for changes to the operating mode for the given op in the given app package.
      * @param op The operation to monitor, one of OP_*.
@@ -1054,7 +989,6 @@ public class AppOpsManager {
             }
         }
     }
-
     /**
      * Stop monitoring that was previously started with {@link #startWatchingMode}.  All
      * monitoring associated with this callback will be removed.
@@ -1070,11 +1004,9 @@ public class AppOpsManager {
             }
         }
     }
-
     private String buildSecurityExceptionMsg(int op, int uid, String packageName) {
         return packageName + " from uid " + uid + " not allowed to perform " + sOpNames[op];
     }
-
     /**
      * {@hide}
      */
@@ -1085,7 +1017,6 @@ public class AppOpsManager {
         }
         return val;
     }
-
     /**
      * Do a quick check for whether an application might be able to perform an operation.
      * This is <em>not</em> a security check; you must use {@link #noteOp(String, int, String)}
@@ -1105,7 +1036,6 @@ public class AppOpsManager {
     public int checkOp(String op, int uid, String packageName) {
         return checkOp(strOpToOp(op), uid, packageName);
     }
-
     /**
      * Like {@link #checkOp} but instead of throwing a {@link SecurityException} it
      * returns {@link #MODE_ERRORED}.
@@ -1113,7 +1043,6 @@ public class AppOpsManager {
     public int checkOpNoThrow(String op, int uid, String packageName) {
         return checkOpNoThrow(strOpToOp(op), uid, packageName);
     }
-
     /**
      * Make note of an application performing an operation.  Note that you must pass
      * in both the uid and name of the application to be checked; this function will verify
@@ -1131,7 +1060,6 @@ public class AppOpsManager {
     public int noteOp(String op, int uid, String packageName) {
         return noteOp(strOpToOp(op), uid, packageName);
     }
-
     /**
      * Like {@link #noteOp} but instead of throwing a {@link SecurityException} it
      * returns {@link #MODE_ERRORED}.
@@ -1139,7 +1067,6 @@ public class AppOpsManager {
     public int noteOpNoThrow(String op, int uid, String packageName) {
         return noteOpNoThrow(strOpToOp(op), uid, packageName);
     }
-
     /**
      * Report that an application has started executing a long-running operation.  Note that you
      * must pass in both the uid and name of the application to be checked; this function will
@@ -1159,7 +1086,6 @@ public class AppOpsManager {
     public int startOp(String op, int uid, String packageName) {
         return startOp(strOpToOp(op), uid, packageName);
     }
-
     /**
      * Like {@link #startOp} but instead of throwing a {@link SecurityException} it
      * returns {@link #MODE_ERRORED}.
@@ -1167,7 +1093,6 @@ public class AppOpsManager {
     public int startOpNoThrow(String op, int uid, String packageName) {
         return startOpNoThrow(strOpToOp(op), uid, packageName);
     }
-
     /**
      * Report that an application is no longer performing an operation that had previously
      * been started with {@link #startOp(String, int, String)}.  There is no validation of input
@@ -1177,7 +1102,6 @@ public class AppOpsManager {
     public void finishOp(String op, int uid, String packageName) {
         finishOp(strOpToOp(op), uid, packageName);
     }
-
     /**
      * Do a quick check for whether an application might be able to perform an operation.
      * This is <em>not</em> a security check; you must use {@link #noteOp(int, int, String)}
@@ -1206,7 +1130,6 @@ public class AppOpsManager {
         }
         return MODE_IGNORED;
     }
-
     /**
      * Like {@link #checkOp} but instead of throwing a {@link SecurityException} it
      * returns {@link #MODE_ERRORED}.
@@ -1219,7 +1142,6 @@ public class AppOpsManager {
         }
         return MODE_IGNORED;
     }
-
     /**
      * Do a quick check to validate if a package name belongs to a UID.
      *
@@ -1236,7 +1158,6 @@ public class AppOpsManager {
             throw new SecurityException("Unable to verify package ownership", e);
         }
     }
-
     /**
      * Like {@link #checkOp} but at a stream-level for audio operations.
      * @hide
@@ -1252,7 +1173,6 @@ public class AppOpsManager {
         }
         return MODE_IGNORED;
     }
-
     /**
      * Like {@link #checkAudioOp} but instead of throwing a {@link SecurityException} it
      * returns {@link #MODE_ERRORED}.
@@ -1265,7 +1185,6 @@ public class AppOpsManager {
         }
         return MODE_IGNORED;
     }
-
     /**
      * Make note of an application performing an operation.  Note that you must pass
      * in both the uid and name of the application to be checked; this function will verify
@@ -1292,7 +1211,6 @@ public class AppOpsManager {
         }
         return MODE_IGNORED;
     }
-
     /**
      * Like {@link #noteOp} but instead of throwing a {@link SecurityException} it
      * returns {@link #MODE_ERRORED}.
@@ -1305,12 +1223,10 @@ public class AppOpsManager {
         }
         return MODE_IGNORED;
     }
-
     /** @hide */
     public int noteOp(int op) {
         return noteOp(op, Process.myUid(), mContext.getOpPackageName());
     }
-
     /** @hide */
     public static IBinder getToken(IAppOpsService service) {
         synchronized (AppOpsManager.class) {
@@ -1325,7 +1241,6 @@ public class AppOpsManager {
             return sToken;
         }
     }
-
     /**
      * Report that an application has started executing a long-running operation.  Note that you
      * must pass in both the uid and name of the application to be checked; this function will
@@ -1354,7 +1269,6 @@ public class AppOpsManager {
         }
         return MODE_IGNORED;
     }
-
     /**
      * Like {@link #startOp} but instead of throwing a {@link SecurityException} it
      * returns {@link #MODE_ERRORED}.
@@ -1367,12 +1281,10 @@ public class AppOpsManager {
         }
         return MODE_IGNORED;
     }
-
     /** @hide */
     public int startOp(int op) {
         return startOp(op, Process.myUid(), mContext.getOpPackageName());
     }
-
     /**
      * Report that an application is no longer performing an operation that had previously
      * been started with {@link #startOp(int, int, String)}.  There is no validation of input
@@ -1386,7 +1298,6 @@ public class AppOpsManager {
         } catch (RemoteException e) {
         }
     }
-
     /** @hide */
     public void finishOp(int op) {
         finishOp(op, Process.myUid(), mContext.getOpPackageName());
