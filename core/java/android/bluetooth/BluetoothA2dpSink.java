@@ -371,27 +371,6 @@ public final class BluetoothA2dpSink implements BluetoothProfile {
     }
 
     /**
-     * Check if A2DP profile is streaming music.
-     *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
-     * @param device BluetoothDevice device
-     */
-    public boolean isA2dpPlaying(BluetoothDevice device) {
-        if (mService != null && isEnabled()
-            && isValidDevice(device)) {
-            try {
-                return mService.isA2dpPlaying(device);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
-                return false;
-            }
-        }
-        if (mService == null) Log.w(TAG, "Proxy not attached to service");
-        return false;
-    }
-
-    /**
      * Helper for converting a state to a string.
      *
      * For debug use only - strings are not internationalized.

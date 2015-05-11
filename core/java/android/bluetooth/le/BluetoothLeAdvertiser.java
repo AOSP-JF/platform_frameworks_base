@@ -267,9 +267,7 @@ public final class BluetoothLeAdvertiser {
                     Log.e(TAG, "Failed to start registeration", e);
                 }
                 if (mClientIf > 0 && mIsAdvertising) {
-                    if (!mLeAdvertisers.containsKey(mAdvertiseCallback)) {
-                        mLeAdvertisers.put(mAdvertiseCallback, this);
-                    }
+                    mLeAdvertisers.put(mAdvertiseCallback, this);
                 } else if (mClientIf <= 0) {
                     // Post internal error if registration failed.
                     postStartFailure(mAdvertiseCallback,
@@ -335,9 +333,6 @@ public final class BluetoothLeAdvertiser {
                         // Start success
                         mIsAdvertising = true;
                         postStartSuccess(mAdvertiseCallback, settings);
-                        if (!mLeAdvertisers.containsKey(mAdvertiseCallback)) {
-                            mLeAdvertisers.put(mAdvertiseCallback, this);
-                        }
                     } else {
                         // Start failure.
                         postStartFailure(mAdvertiseCallback, status);
