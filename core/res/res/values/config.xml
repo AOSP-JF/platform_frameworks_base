@@ -1993,6 +1993,10 @@
     <!-- Configuration to sending and receiving Mms when mobile data is disable.-->
     <bool name="config_enable_mms_with_mobile_data_off">false</bool>
     
+    <!-- Configuration to set delete any partial segments expire age -->
+    <!-- 30 days by default (60 * 60 * 1000) * 24 * 30 , no long so use string-->
+    <string name="config_partial_segment_expire_age">2592000000</string>
+    
     <!-- Is the device LTE capable -->
     <bool name="config_lte_capable">true</bool>
     
