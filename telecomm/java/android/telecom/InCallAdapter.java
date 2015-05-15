@@ -57,6 +57,22 @@ public final class InCallAdapter {
     }
 
     /**
+     * Instructs Telecomm to deflect the specified call.
+     *
+     * @param callId The identifier of the call to deflect.
+     * @param deflectNumber The number to deflect.
+     */
+    /**
+     * {@hide}
+     */
+    public void deflectCall(String callId, String deflectNumber) {
+        try {
+            mAdapter.deflectCall(callId, deflectNumber);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
      * Instructs Telecom to reject the specified call.
      *
      * @param callId The identifier of the call to reject.
@@ -189,16 +205,14 @@ public final class InCallAdapter {
     }
 
     /**
-     * Instructs Telecom to add a PhoneAccountHandle to the specified call.
+     * Instructs Telecom to add a PhoneAccountHandle to the specified call
      *
-     * @param callId The identifier of the call.
-     * @param accountHandle The PhoneAccountHandle through which to place the call.
-     * @param setDefault {@code True} if this account should be set as the default for calls.
+     * @param callId The identifier of the call
+     * @param accountHandle The PhoneAccountHandle through which to place the call
      */
-    public void phoneAccountSelected(String callId, PhoneAccountHandle accountHandle,
-            boolean setDefault) {
+    public void phoneAccountSelected(String callId, PhoneAccountHandle accountHandle) {
         try {
-            mAdapter.phoneAccountSelected(callId, accountHandle, setDefault);
+            mAdapter.phoneAccountSelected(callId, accountHandle);
         } catch (RemoteException e) {
         }
     }
@@ -271,6 +285,20 @@ public final class InCallAdapter {
         try {
             mAdapter.turnOffProximitySensor(screenOnImmediately);
         } catch (RemoteException ignored) {
+        }
+    }
+
+    /**
+     * Instructs Telecomm to switch to other active subscripion
+     *
+     * @param sub switch to this subscription
+     * @param retainLch whether LCH on switched sub should be retained.
+     * {@hide}
+     */
+    public void switchToOtherActiveSub(String sub, boolean retainLch) {
+        try {
+            mAdapter.switchToOtherActiveSub(sub, retainLch);
+        } catch (RemoteException e) {
         }
     }
 }

@@ -173,7 +173,17 @@ public final class Call {
          * Call is able to be individually disconnected when in a {@code Conference}.
          */
         public static final int CAPABILITY_DISCONNECT_FROM_CONFERENCE = 0x00002000;
-        
+
+        /** 
+         * @hide
+         */
+        public static final int CAPABILITY_CALL_TYPE_MODIFIABLE = 0x00020000;
+
+        /**
+         * @hide
+         */
+        public static final int CAPABILITY_ADD_PARTICIPANT      = 0x00080000;
+
         /**
          * Whether the call is a generic conference, where we do not know the precise state of
          * participants in the conference (eg. on CDMA).
@@ -182,11 +192,22 @@ public final class Call {
          */
         public static final int CAPABILITY_GENERIC_CONFERENCE = 0x00004000;
 
+        /** Add participant in an active or conference call option
+         * @hide
+         */
+        public static final int ADD_PARTICIPANT = 0x00008000;
+
+        /**
+         * Call type can be modified for IMS call
+         * @hide
+         */
+        public static final int CALL_TYPE_MODIFIABLE = 0x00020000;
+
         /**
          * Speed up audio setup for MT call.
          * @hide
          */
-        public static final int CAPABILITY_SPEED_UP_MT_AUDIO = 0x00008000;
+        public static final int CAPABILITY_SPEED_UP_MT_AUDIO = 0x00040000;
 
         private final Uri mHandle;
         private final int mHandlePresentation;
@@ -196,11 +217,13 @@ public final class Call {
         private final int mCallCapabilities;
         private final int mCallProperties;
         private final DisconnectCause mDisconnectCause;
+        private final long mCreateTimeMillis;
         private final long mConnectTimeMillis;
         private final GatewayInfo mGatewayInfo;
         private final int mVideoState;
         private final StatusHints mStatusHints;
         private final Bundle mExtras;
+        private final int mCallSubstate;
 
         /**
          * Whether the supplied capabilities  supports the specified capability.
@@ -269,6 +292,12 @@ public final class Call {
             }
             if (can(capabilities, CAPABILITY_GENERIC_CONFERENCE)) {
                 builder.append(" CAPABILITY_GENERIC_CONFERENCE");
+            }
+            if (can(capabilities, CALL_TYPE_MODIFIABLE)) {
+                builder.append(" CALL_TYPE_MODIFIABLE");
+            }
+            if (can(capabilities, ADD_PARTICIPANT)) {
+                builder.append(" ADD_PARTICIPANT");
             }
             if (can(capabilities, CAPABILITY_SPEED_UP_MT_AUDIO)) {
                 builder.append(" CAPABILITY_SPEED_UP_IMS_MT_AUDIO");
@@ -350,6 +379,14 @@ public final class Call {
         }
 
         /**
+         * @return the time the Call object was created
+         * {@hide}
+         */
+        public long getCreateTimeMillis() {
+            return mCreateTimeMillis;
+        }
+
+        /**
          * @return Information about any calling gateway the {@code Call} may be using.
          */
         public GatewayInfo getGatewayInfo() {
@@ -378,6 +415,14 @@ public final class Call {
             return mExtras;
         }
 
+        /**
+         * @return The substate of the {@code Call}.
+         * {@hide}
+         */
+        public int getCallSubstate() {
+            return mCallSubstate;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (o instanceof Details) {
@@ -392,11 +437,13 @@ public final class Call {
                         Objects.equals(mCallCapabilities, d.mCallCapabilities) &&
                         Objects.equals(mCallProperties, d.mCallProperties) &&
                         Objects.equals(mDisconnectCause, d.mDisconnectCause) &&
+                        Objects.equals(mCreateTimeMillis, d.mCreateTimeMillis) &&
                         Objects.equals(mConnectTimeMillis, d.mConnectTimeMillis) &&
                         Objects.equals(mGatewayInfo, d.mGatewayInfo) &&
                         Objects.equals(mVideoState, d.mVideoState) &&
                         Objects.equals(mStatusHints, d.mStatusHints) &&
-                        Objects.equals(mExtras, d.mExtras);
+                        Objects.equals(mExtras, d.mExtras) &&
+                        Objects.equals(mCallSubstate, d.mCallSubstate);
             }
             return false;
         }
@@ -412,11 +459,13 @@ public final class Call {
                     Objects.hashCode(mCallCapabilities) +
                     Objects.hashCode(mCallProperties) +
                     Objects.hashCode(mDisconnectCause) +
+                    Objects.hashCode(mCreateTimeMillis) +
                     Objects.hashCode(mConnectTimeMillis) +
                     Objects.hashCode(mGatewayInfo) +
                     Objects.hashCode(mVideoState) +
                     Objects.hashCode(mStatusHints) +
-                    Objects.hashCode(mExtras);
+                    Objects.hashCode(mExtras) +
+                    Objects.hashCode(mCallSubstate);
         }
 
         /** {@hide} */
@@ -429,11 +478,13 @@ public final class Call {
                 int capabilities,
                 int properties,
                 DisconnectCause disconnectCause,
+                long createTimeMillis,
                 long connectTimeMillis,
                 GatewayInfo gatewayInfo,
                 int videoState,
                 StatusHints statusHints,
-                Bundle extras) {
+                Bundle extras,
+                int callSubstate) {
             mHandle = handle;
             mHandlePresentation = handlePresentation;
             mCallerDisplayName = callerDisplayName;
@@ -442,11 +493,13 @@ public final class Call {
             mCallCapabilities = capabilities;
             mCallProperties = properties;
             mDisconnectCause = disconnectCause;
+            mCreateTimeMillis = createTimeMillis;
             mConnectTimeMillis = connectTimeMillis;
             mGatewayInfo = gatewayInfo;
             mVideoState = videoState;
             mStatusHints = statusHints;
             mExtras = extras;
+            mCallSubstate = callSubstate;
         }
     }
 
@@ -554,6 +607,9 @@ public final class Call {
     private InCallService.VideoCall mVideoCall;
     private Details mDetails;
 
+    /** {@hide} */
+    public boolean mIsActiveSub = false;
+
     /**
      * Obtains the post-dial sequence remaining to be emitted by this {@code Call}, if any.
      *
@@ -570,6 +626,15 @@ public final class Call {
      */
     public void answer(int videoState) {
         mInCallAdapter.answerCall(mTelecomCallId, videoState);
+    }
+
+    /**
+     * Instructs this {@link #STATE_RINGING} {@code Call} to deflect.
+     * @param number The number to which the call will be deflected.
+     */
+    /** @hide */
+    public void deflectCall(String number) {
+        mInCallAdapter.deflectCall(mTelecomCallId, number);
     }
 
     /**
@@ -650,10 +715,10 @@ public final class Call {
 
     /**
      * Notifies this {@code Call} that an account has been selected and to proceed with placing
-     * an outgoing call. Optionally sets this account as the default account.
+     * an outgoing call.
      */
     public void phoneAccountSelected(PhoneAccountHandle accountHandle, boolean setDefault) {
-        mInCallAdapter.phoneAccountSelected(mTelecomCallId, accountHandle, setDefault);
+        mInCallAdapter.phoneAccountSelected(mTelecomCallId, accountHandle);
 
     }
 
@@ -799,11 +864,22 @@ public final class Call {
     }
 
     /** {@hide} */
-    Call(Phone phone, String telecomCallId, InCallAdapter inCallAdapter) {
+    Call(Phone phone, String telecomCallId, InCallAdapter inCallAdapter, boolean isActiveSub) {
         mPhone = phone;
         mTelecomCallId = telecomCallId;
         mInCallAdapter = inCallAdapter;
         mState = STATE_NEW;
+        mIsActiveSub = isActiveSub;
+    }
+
+     /** {@hide} */
+    Call(Phone phone, String telecomCallId, InCallAdapter inCallAdapter, boolean isActiveSub,
+            int state) {
+        mPhone = phone;
+        mTelecomCallId = telecomCallId;
+        mInCallAdapter = inCallAdapter;
+        mState = state;
+        mIsActiveSub = isActiveSub;
     }
 
     /** {@hide} */
@@ -823,11 +899,13 @@ public final class Call {
                 parcelableCall.getCapabilities(),
                 parcelableCall.getProperties(),
                 parcelableCall.getDisconnectCause(),
+                parcelableCall.getCreateTimeMillis(),
                 parcelableCall.getConnectTimeMillis(),
                 parcelableCall.getGatewayInfo(),
                 parcelableCall.getVideoState(),
                 parcelableCall.getStatusHints(),
-                parcelableCall.getExtras());
+                parcelableCall.getExtras(),
+                parcelableCall.getCallSubstate());
         boolean detailsChanged = !Objects.equals(mDetails, details);
         if (detailsChanged) {
             mDetails = details;
@@ -846,9 +924,10 @@ public final class Call {
         }
 
         int state = stateFromParcelableCallState(parcelableCall.getState());
-        boolean stateChanged = mState != state;
+        boolean stateChanged = (mState != state) || (mIsActiveSub != parcelableCall.mIsActiveSub);
         if (stateChanged) {
             mState = state;
+            mIsActiveSub = parcelableCall.mIsActiveSub;
         }
 
         String parentId = parcelableCall.getParentCallId();

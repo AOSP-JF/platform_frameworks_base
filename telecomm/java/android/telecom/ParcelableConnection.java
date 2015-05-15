@@ -35,6 +35,7 @@ public final class ParcelableConnection implements Parcelable {
     private final PhoneAccountHandle mPhoneAccount;
     private final int mState;
     private final int mConnectionCapabilities;
+    private final int mProperties;
     private final Uri mAddress;
     private final int mAddressPresentation;
     private final String mCallerDisplayName;
@@ -46,8 +47,45 @@ public final class ParcelableConnection implements Parcelable {
     private final StatusHints mStatusHints;
     private final DisconnectCause mDisconnectCause;
     private final List<String> mConferenceableConnectionIds;
+    private final int mCallSubstate;
 
     /** @hide */
+    public ParcelableConnection(
+            PhoneAccountHandle phoneAccount,
+            int state,
+            int capabilities,
+            int properties,
+            Uri address,
+            int addressPresentation,
+            String callerDisplayName,
+            int callerDisplayNamePresentation,
+            IVideoProvider videoProvider,
+            int videoState,
+            boolean ringbackRequested,
+            boolean isVoipAudioMode,
+            StatusHints statusHints,
+            DisconnectCause disconnectCause,
+            List<String> conferenceableConnectionIds,
+            int callSubstate) {
+        mPhoneAccount = phoneAccount;
+        mState = state;
+        mConnectionCapabilities = capabilities;
+        mProperties = properties;
+        mAddress = address;
+        mAddressPresentation = addressPresentation;
+        mCallerDisplayName = callerDisplayName;
+        mCallerDisplayNamePresentation = callerDisplayNamePresentation;
+        mVideoProvider = videoProvider;
+        mVideoState = videoState;
+        mRingbackRequested = ringbackRequested;
+        mIsVoipAudioMode = isVoipAudioMode;
+        mStatusHints = statusHints;
+        mDisconnectCause = disconnectCause;
+        this.mConferenceableConnectionIds = conferenceableConnectionIds;
+        mCallSubstate = callSubstate;
+    }
+
+    /* @hide */
     public ParcelableConnection(
             PhoneAccountHandle phoneAccount,
             int state,
@@ -62,10 +100,12 @@ public final class ParcelableConnection implements Parcelable {
             boolean isVoipAudioMode,
             StatusHints statusHints,
             DisconnectCause disconnectCause,
-            List<String> conferenceableConnectionIds) {
-        mPhoneAccount = phoneAccount;
+            List<String> conferenceableConnectionIds,
+            int callSubstate) {
+               mPhoneAccount = phoneAccount;
         mState = state;
         mConnectionCapabilities = capabilities;
+        mProperties = 0;
         mAddress = address;
         mAddressPresentation = addressPresentation;
         mCallerDisplayName = callerDisplayName;
@@ -77,7 +117,8 @@ public final class ParcelableConnection implements Parcelable {
         mStatusHints = statusHints;
         mDisconnectCause = disconnectCause;
         this.mConferenceableConnectionIds = conferenceableConnectionIds;
-    }
+        mCallSubstate = callSubstate;
+    } 
 
     public PhoneAccountHandle getPhoneAccount() {
         return mPhoneAccount;
@@ -90,6 +131,10 @@ public final class ParcelableConnection implements Parcelable {
     // Bit mask of actions a call supports, values are defined in {@link CallCapabilities}.
     public int getConnectionCapabilities() {
         return mConnectionCapabilities;
+    }
+
+    public int getProperties() {
+        return mProperties;
     }
 
     public Uri getHandle() {
@@ -136,6 +181,10 @@ public final class ParcelableConnection implements Parcelable {
         return mConferenceableConnectionIds;
     }
 
+    public int getCallSubstate() {
+        return mCallSubstate;
+    }
+
     @Override
     public String toString() {
         return new StringBuilder()
@@ -145,6 +194,8 @@ public final class ParcelableConnection implements Parcelable {
                 .append(mState)
                 .append(", capabilities:")
                 .append(Connection.capabilitiesToString(mConnectionCapabilities))
+                .append(", properties:")
+                .append(Integer.toHexString(mProperties))
                 .toString();
     }
 
@@ -157,6 +208,7 @@ public final class ParcelableConnection implements Parcelable {
             PhoneAccountHandle phoneAccount = source.readParcelable(classLoader);
             int state = source.readInt();
             int capabilities = source.readInt();
+            int properties = source.readInt();
             Uri address = source.readParcelable(classLoader);
             int addressPresentation = source.readInt();
             String callerDisplayName = source.readString();
@@ -170,11 +222,13 @@ public final class ParcelableConnection implements Parcelable {
             DisconnectCause disconnectCause = source.readParcelable(classLoader);
             List<String> conferenceableConnectionIds = new ArrayList<>();
             source.readStringList(conferenceableConnectionIds);
+            int callSubstate = source.readInt();
 
             return new ParcelableConnection(
                     phoneAccount,
                     state,
                     capabilities,
+                    properties,
                     address,
                     addressPresentation,
                     callerDisplayName,
@@ -185,7 +239,8 @@ public final class ParcelableConnection implements Parcelable {
                     audioModeIsVoip,
                     statusHints,
                     disconnectCause,
-                    conferenceableConnectionIds);
+                    conferenceableConnectionIds,
+                    callSubstate);
         }
 
         @Override
@@ -206,6 +261,7 @@ public final class ParcelableConnection implements Parcelable {
         destination.writeParcelable(mPhoneAccount, 0);
         destination.writeInt(mState);
         destination.writeInt(mConnectionCapabilities);
+        destination.writeInt(mProperties);
         destination.writeParcelable(mAddress, 0);
         destination.writeInt(mAddressPresentation);
         destination.writeString(mCallerDisplayName);
@@ -218,5 +274,6 @@ public final class ParcelableConnection implements Parcelable {
         destination.writeParcelable(mStatusHints, 0);
         destination.writeParcelable(mDisconnectCause, 0);
         destination.writeStringList(mConferenceableConnectionIds);
+        destination.writeInt(mCallSubstate);
     }
 }

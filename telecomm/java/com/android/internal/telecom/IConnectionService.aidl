@@ -48,6 +48,8 @@ oneway interface IConnectionService {
 
     void answer(String callId);
 
+    void deflect(String callId, String number);
+
     void reject(String callId);
 
     void disconnect(String callId);
@@ -71,4 +73,10 @@ oneway interface IConnectionService {
     void swapConference(String conferenceCallId);
 
     void onPostDialContinue(String callId, boolean proceed);
+
+    void setLocalCallHold(String callId, int lchState);
+
+    void setActiveSubscription(String callId);
+
+    void addParticipantWithConference(String callId, String receipants);
 }

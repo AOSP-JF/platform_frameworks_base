@@ -13,12 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.keyguard;
-
 import java.util.List;
 import java.util.Locale;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -32,31 +29,24 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.IccCardConstants.State;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.widget.LockPatternUtils;
-
 public class CarrierText extends TextView {
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final String TAG = "CarrierText";
-
     private static CharSequence mSeparator;
-
     private LockPatternUtils mLockPatternUtils;
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-
     private KeyguardUpdateMonitorCallback mCallback = new KeyguardUpdateMonitorCallback() {
         @Override
         public void onRefreshCarrierInfo() {
             updateCarrierText();
         }
-
         public void onScreenTurnedOff(int why) {
             setSelected(false);
         };
-
         public void onScreenTurnedOn() {
             setSelected(true);
         };
@@ -74,11 +64,9 @@ public class CarrierText extends TextView {
         SimPermDisabled, // SIM card is permanently disabled due to PUK unlock failure
         SimNotReady; // SIM is not ready yet. May never be on devices w/o a SIM.
     }
-
     public CarrierText(Context context) {
         this(context, null);
     }
-
     public CarrierText(Context context, AttributeSet attrs) {
         super(context, attrs);
         mLockPatternUtils = new LockPatternUtils(mContext);
@@ -92,11 +80,9 @@ public class CarrierText extends TextView {
         }
         setTransformationMethod(new CarrierTextTransformationMethod(mContext, useAllCaps));
     }
-
     protected void updateCarrierText() {
         boolean allSimsMissing = true;
         CharSequence displayText = null;
-
         List<SubscriptionInfo> subs = mKeyguardUpdateMonitor.getSubscriptionInfo(false);
         final int N = subs.size();
         if (DEBUG) Log.d(TAG, "updateCarrierText(): " + N);
@@ -148,7 +134,6 @@ public class CarrierText extends TextView {
         }
         setText(displayText);
     }
-
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
@@ -157,7 +142,6 @@ public class CarrierText extends TextView {
         final boolean screenOn = KeyguardUpdateMonitor.getInstance(mContext).isScreenOn();
         setSelected(screenOn); // Allow marquee to work.
     }
-
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
@@ -171,7 +155,6 @@ public class CarrierText extends TextView {
             setText("");
         }
     }
-
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
@@ -179,7 +162,6 @@ public class CarrierText extends TextView {
             mKeyguardUpdateMonitor.removeCallback(mCallback);
         }
     }
-
     /**
      * Top-level function for creating carrier text. Makes text based on simState, PLMN
      * and SPN as well as device capabilities, such as being emergency call capable.
@@ -197,46 +179,37 @@ public class CarrierText extends TextView {
             case Normal:
                 carrierText = text;
                 break;
-
             case SimNotReady:
                 // Null is reserved for denoting missing, in this case we have nothing to display.
                 carrierText = ""; // nothing to display yet.
                 break;
-
             case NetworkLocked:
                 carrierText = makeCarrierStringOnEmergencyCapable(
                         mContext.getText(R.string.keyguard_network_locked_message), text);
                 break;
-
             case SimMissing:
                 carrierText = null;
                 break;
-
             case SimPermDisabled:
                 carrierText = getContext().getText(
                         R.string.keyguard_permanent_disabled_sim_message_short);
                 break;
-
             case SimMissingLocked:
                 carrierText = null;
                 break;
-
             case SimLocked:
                 carrierText = makeCarrierStringOnEmergencyCapable(
                         getContext().getText(R.string.keyguard_sim_locked_message),
                         text);
                 break;
-
             case SimPukLocked:
                 carrierText = makeCarrierStringOnEmergencyCapable(
                         getContext().getText(R.string.keyguard_sim_puk_locked_message),
                         text);
                 break;
         }
-
         return carrierText;
     }
-
     /*
      * Add emergencyCallMessage to carrier string only if phone supports emergency calls.
      */
@@ -247,7 +220,6 @@ public class CarrierText extends TextView {
         }
         return simMessage;
     }
-
     /**
      * Determine the current status of the lock screen given the SIM state and other stuff.
      */
@@ -256,18 +228,16 @@ public class CarrierText extends TextView {
         if (simState == null) {
             return StatusMode.Normal;
         }
-
         final boolean missingAndNotProvisioned =
                 !KeyguardUpdateMonitor.getInstance(mContext).isDeviceProvisioned()
                 && (simState == IccCardConstants.State.ABSENT ||
                         simState == IccCardConstants.State.PERM_DISABLED);
-
         // Assume we're NETWORK_LOCKED if not provisioned
-        simState = missingAndNotProvisioned ? IccCardConstants.State.NETWORK_LOCKED : simState;
+        simState = missingAndNotProvisioned ? IccCardConstants.State.PERSO_LOCKED : simState;
         switch (simState) {
             case ABSENT:
                 return StatusMode.SimMissing;
-            case NETWORK_LOCKED:
+            case PERSO_LOCKED:
                 return StatusMode.SimMissingLocked;
             case NOT_READY:
                 return StatusMode.SimNotReady;
@@ -284,7 +254,6 @@ public class CarrierText extends TextView {
         }
         return StatusMode.SimMissing;
     }
-
     private static CharSequence concatenate(CharSequence plmn, CharSequence spn) {
         final boolean plmnValid = !TextUtils.isEmpty(plmn);
         final boolean spnValid = !TextUtils.isEmpty(spn);
@@ -302,7 +271,6 @@ public class CarrierText extends TextView {
             return "";
         }
     }
-
     private CharSequence getCarrierHelpTextForSimState(IccCardConstants.State simState,
             String plmn, String spn) {
         int carrierHelpTextId = 0;
@@ -311,45 +279,35 @@ public class CarrierText extends TextView {
             case NetworkLocked:
                 carrierHelpTextId = R.string.keyguard_instructions_when_pattern_disabled;
                 break;
-
             case SimMissing:
                 carrierHelpTextId = R.string.keyguard_missing_sim_instructions_long;
                 break;
-
             case SimPermDisabled:
                 carrierHelpTextId = R.string.keyguard_permanent_disabled_sim_instructions;
                 break;
-
             case SimMissingLocked:
                 carrierHelpTextId = R.string.keyguard_missing_sim_instructions;
                 break;
-
             case Normal:
             case SimLocked:
             case SimPukLocked:
                 break;
         }
-
         return mContext.getText(carrierHelpTextId);
     }
-
     private class CarrierTextTransformationMethod extends SingleLineTransformationMethod {
         private final Locale mLocale;
         private final boolean mAllCaps;
-
         public CarrierTextTransformationMethod(Context context, boolean allCaps) {
             mLocale = context.getResources().getConfiguration().locale;
             mAllCaps = allCaps;
         }
-
         @Override
         public CharSequence getTransformation(CharSequence source, View view) {
             source = super.getTransformation(source, view);
-
             if (mAllCaps && source != null) {
                 source = source.toString().toUpperCase(mLocale);
             }
-
             return source;
         }
     }

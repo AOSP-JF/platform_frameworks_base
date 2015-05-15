@@ -28,6 +28,8 @@ import android.telecom.PhoneAccountHandle;
 oneway interface IInCallAdapter {
     void answerCall(String callId, int videoState);
 
+    void deflectCall(String callId, String deflectNumber);
+
     void rejectCall(String callId, boolean rejectWithMessage, String textMessage);
 
     void disconnectCall(String callId);
@@ -46,8 +48,7 @@ oneway interface IInCallAdapter {
 
     void postDialContinue(String callId, boolean proceed);
 
-    void phoneAccountSelected(String callId, in PhoneAccountHandle accountHandle,
-            boolean setDefault);
+    void phoneAccountSelected(String callId, in PhoneAccountHandle accountHandle);
 
     void conference(String callId, String otherCallId);
 
@@ -60,4 +61,6 @@ oneway interface IInCallAdapter {
     void turnOnProximitySensor();
 
     void turnOffProximitySensor(boolean screenOnImmediately);
+
+    void switchToOtherActiveSub(String sub, boolean retainLch);
 }

@@ -25,6 +25,7 @@ import com.android.i18n.phonenumbers.ShortNumberUtil;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.location.Country;
 import android.location.CountryDetector;
 import android.net.Uri;
 import android.os.SystemProperties;
@@ -79,6 +80,7 @@ public class PhoneNumberUtils
     static final String LOG_TAG = "PhoneNumberUtils";
     private static final boolean DBG = false;
 
+    private static Country sCountryDetector = null;
     /*
      * global-phone-number = ["+"] 1*( DIGIT / written-sep )
      * written-sep         = ("-"/".")
@@ -1063,6 +1065,11 @@ public class PhoneNumberUtils
      */
     private static byte[]
     numberToCalledPartyBCDHelper(String number, boolean includeLength) {
+        // returns null if number is empty
+        if (TextUtils.isEmpty(number)) {
+            return null;
+        }
+
         int numberLenReal = number.length();
         int numberLenEffective = numberLenReal;
         boolean hasPlus = number.indexOf('+') != -1;
@@ -1546,7 +1553,8 @@ public class PhoneNumberUtils
     //
     // However, in order to loose match 650-555-1212 and 555-1212, we need to set the min match
     // to 7.
-    static final int MIN_MATCH = 7;
+    // For CTA and some carrier requirement, we need to change it to 11, it can be set dynamically.
+    static final int MIN_MATCH = SystemProperties.getInt("persist.env.c.phone.matchnum", 7);
 
     /**
      * Checks a given number against the list of
@@ -1815,17 +1823,19 @@ public class PhoneNumberUtils
         // to the list.
         number = extractNetworkPortionAlt(number);
 
-        Rlog.d(LOG_TAG, "subId:" + subId + ", defaultCountryIso:" +
+        Rlog.d(LOG_TAG, "subId:" + subId + ", number: " +  number + ", defaultCountryIso:" +
                 ((defaultCountryIso == null) ? "NULL" : defaultCountryIso));
 
         String emergencyNumbers = "";
         int slotId = SubscriptionManager.getSlotId(subId);
 
-        // retrieve the list of emergency numbers
-        // check read-write ecclist property first
-        String ecclist = (slotId <= 0) ? "ril.ecclist" : ("ril.ecclist" + slotId);
+        if (slotId >= 0) {
+            // retrieve the list of emergency numbers
+            // check read-write ecclist property first
+            String ecclist = (slotId == 0) ? "ril.ecclist" : ("ril.ecclist" + slotId);
 
-        emergencyNumbers = SystemProperties.get(ecclist, "");
+            emergencyNumbers = SystemProperties.get(ecclist, "");
+        }
 
         Rlog.d(LOG_TAG, "slotId:" + slotId + ", emergencyNumbers: " +  emergencyNumbers);
 
@@ -2015,18 +2025,37 @@ public class PhoneNumberUtils
     private static boolean isLocalEmergencyNumberInternal(int subId, String number,
                                                           Context context,
                                                           boolean useExactMatch) {
-        String countryIso;
-        CountryDetector detector = (CountryDetector) context.getSystemService(
-                Context.COUNTRY_DETECTOR);
-        if (detector != null && detector.detectCountry() != null) {
-            countryIso = detector.detectCountry().getCountryIso();
-        } else {
+        String countryIso = getCountryIso(context);
+        Rlog.w(LOG_TAG, "isLocalEmergencyNumberInternal" + countryIso);
+        if (countryIso == null) {
             Locale locale = context.getResources().getConfiguration().locale;
             countryIso = locale.getCountry();
             Rlog.w(LOG_TAG, "No CountryDetector; falling back to countryIso based on locale: "
                     + countryIso);
         }
         return isEmergencyNumberInternal(subId, number, countryIso, useExactMatch);
+    }
+
+    private static String getCountryIso(Context context) {
+        Rlog.w(LOG_TAG, "getCountryIso " + sCountryDetector);
+        if (sCountryDetector == null) {
+            CountryDetector detector = (CountryDetector) context.getSystemService(
+                Context.COUNTRY_DETECTOR);
+            if (detector != null) {
+                sCountryDetector = detector.detectCountry();
+            }
+        }
+
+        if (sCountryDetector == null) {
+            return null;
+        } else {
+            return sCountryDetector.getCountryIso();
+        }
+    }
+
+    /** @hide */
+    public static void resetCountryDetectorInfo() {
+        sCountryDetector = null;
     }
 
     /**
