@@ -688,11 +688,18 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         broadcastCallStateChanged(state, incomingNumber, subId);
     }
 
+    public void notifyServiceState(ServiceState state) {
+         notifyServiceStateForPhoneId(mDefaultPhoneId, mDefaultSubId, state);
+     }
+
     public void notifyServiceStateForPhoneId(int phoneId, int subId, ServiceState state) {
         if (!checkNotifyPermission("notifyServiceState()")){
             return;
         }
-
+        if (subId == SubscriptionManager.DEFAULT_SUBSCRIPTION_ID) {
+            subId = mDefaultSubId;
+            if (VDBG) log("notifyServiceStateForSubscriber: using mDefaultSubId=" + mDefaultSubId);
+        }
         synchronized (mRecords) {
             if (VDBG) {
                 log("notifyServiceStateForSubscriber: subId=" + subId + " phoneId=" + phoneId

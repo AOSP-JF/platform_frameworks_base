@@ -483,6 +483,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             if (IccCardConstants.INTENT_VALUE_ICC_ABSENT.equals(stateExtra)) {
                 final String absentReason = intent
                     .getStringExtra(IccCardConstants.INTENT_KEY_LOCKED_REASON);
+                    
                 if (IccCardConstants.INTENT_VALUE_ABSENT_ON_PERM_DISABLED.equals(
                         absentReason)) {
                     state = IccCardConstants.State.PERM_DISABLED;
@@ -498,11 +499,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                     state = IccCardConstants.State.PIN_REQUIRED;
                 } else if (IccCardConstants.INTENT_VALUE_LOCKED_ON_PUK.equals(lockedReason)) {
                     state = IccCardConstants.State.PUK_REQUIRED;
+                } else if (IccCardConstants.INTENT_VALUE_LOCKED_PERSO.equals(lockedReason)) {
+                    state = IccCardConstants.State.PERSO_LOCKED;
                 } else {
                     state = IccCardConstants.State.UNKNOWN;
                 }
-            } else if (IccCardConstants.INTENT_VALUE_LOCKED_NETWORK.equals(stateExtra)) {
-                state = IccCardConstants.State.PERSO_LOCKED;
+            } else if (IccCardConstants.INTENT_VALUE_ICC_CARD_IO_ERROR.equals(stateExtra)) {
+                state = IccCardConstants.State.CARD_IO_ERROR;
             } else if (IccCardConstants.INTENT_VALUE_ICC_LOADED.equals(stateExtra)
                         || IccCardConstants.INTENT_VALUE_ICC_IMSI.equals(stateExtra)) {
                 // This is required because telephony doesn't return to "READY" after
@@ -1123,25 +1126,19 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         // need IccCardConstants, but TelephonyManager would only give us
         // TelephonyManager.SIM_STATE*, so we retrieve it manually.
         final TelephonyManager tele = TelephonyManager.from(mContext);
-        int simState =  tele.getSimState(slotId);
-        State state;
-        try {
-            state = State.intToState(simState);
-        } catch(IllegalArgumentException ex) {
-            Log.w(TAG, "Unknown sim state: " + simState);
-            state = State.UNKNOWN;
-        }
-        SimData data = mSimDatas.get(subId);
-        final boolean changed;
-        if (data == null) {
-            data = new SimData(state, slotId, subId);
-            mSimDatas.put(subId, data);
-            changed = true; // no data yet; force update
-        } else {
-            changed = data.simState != state;
-            data.simState = state;
-        }
-        return changed;
+         int simState =  tele.getSimState(slotId);
+         State state = State.UNKNOWN;
+         SimData data = mSimDatas.get(subId);
+         final boolean changed;
+         if (data == null) {
+             data = new SimData(state, slotId, subId);
+             mSimDatas.put(subId, data);
+             changed = true; // no data yet; force update
+         } else {
+             changed = data.simState != state;
+             data.simState = state;
+         }
+         return changed;
     }
     public static boolean isSimPinSecure(IccCardConstants.State state) {
         final IccCardConstants.State simState = state;

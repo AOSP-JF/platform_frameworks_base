@@ -9,6 +9,8 @@
          this.
     -->
     
+    <java-symbol type="bool" name="skip_radio_power_off_on_sim_refresh_reset" />
+    
     <!-- sim refresh for dual mode card -->
     <java-symbol type="bool" name="config_sim_refresh_for_dual_mode_card" />
     
@@ -50,4 +52,7 @@
     <!-- Enabled ESN Tracker -->
     <java-symbol type="bool" name="config_telephony_ESN_Tracker_enabled" />
     
+    <!-- From various Material changes -->
+    <java-symbol type="string" name="config_partial_segment_expire_age" />
+    <java-symbol type="bool" name="config_global_phone_enabled" />
 </resources>
