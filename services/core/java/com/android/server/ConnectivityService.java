@@ -290,6 +290,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private static final int EVENT_SEND_STICKY_BROADCAST_INTENT = 11;
 
     /**
+     * Used internally to
+     * {@link NetworkStateTracker#setPolicyDataEnable(boolean)}.
+     */
+    private static final int EVENT_SET_POLICY_DATA_ENABLE = 12;
+
+    /**
      * Used internally to disable fail fast of mobile data
      */
     private static final int EVENT_ENABLE_FAIL_FAST_MOBILE_DATA = 14;
@@ -1424,6 +1430,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     };
 
+    @Override
+    public void setPolicyDataEnable(int networkType, boolean enabled) {
+        // only someone like NPMS should only be calling us
+        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+
+        mHandler.sendMessage(mHandler.obtainMessage(
+                EVENT_SET_POLICY_DATA_ENABLE, networkType, (enabled ? ENABLED : DISABLED)));
+    }
+    
     private void enforceInternetPermission() {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.INTERNET,
