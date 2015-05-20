@@ -152,7 +152,7 @@ public class VideoCallImpl extends VideoCall {
                             (CameraCapabilities) msg.obj);
                     break;
                 case MSG_CHANGE_VIDEO_QUALITY:
-                    mVideoCallListener.onVideoQualityChanged(msg.arg1);
+                    //mVideoCallListener.onVideoQualityChanged(msg.arg1);
                     break;
                 default:
                     break;
