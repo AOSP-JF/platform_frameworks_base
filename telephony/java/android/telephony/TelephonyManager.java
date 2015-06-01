@@ -1659,9 +1659,7 @@ public class TelephonyManager {
             Rlog.d(TAG, "getSimState:- empty subId return SIM_STATE_ABSENT");
             return SIM_STATE_UNKNOWN;
         }
-        int simState = SubscriptionManager.getSimStateForSubscriber(subId[0]);
-        Rlog.d(TAG, "getSimState: simState=" + simState + " slotIdx=" + slotIdx);
-        return simState;
+        return SubscriptionManager.getSimStateForSubscriber(subId[0]);
     }
 
     /**
@@ -1711,7 +1709,6 @@ public class TelephonyManager {
                 }
             }
         }
-        Rlog.d(TAG, "getSimOperatorNumeric(): default subId=" + subId);
         return getSimOperatorNumericForSubscription(subId);
     }
 
@@ -3786,9 +3783,15 @@ public class TelephonyManager {
     public void setDataEnabled(boolean enable) {
         setDataEnabled(SubscriptionManager.getDefaultDataSubId(), enable);
     }
+
     /** @hide */
     @SystemApi
     public void setDataEnabled(int subId, boolean enable) {
+        setDataEnabledUsingSubId(subId, enable);
+    }
+
+   /** @hide */
+    public void setDataEnabledUsingSubId(int subId, boolean enable) {
         try {
             Log.d(TAG, "setDataEnabled: enabled=" + enable);
             getITelephony().setDataEnabled(subId, enable);
@@ -3796,11 +3799,13 @@ public class TelephonyManager {
             Log.e(TAG, "Error calling ITelephony#setDataEnabled", e);
         }
     }
+
     /** @hide */
     @SystemApi
     public boolean getDataEnabled() {
         return getDataEnabled(SubscriptionManager.getDefaultDataSubId());
     }
+
     /** @hide */
     @SystemApi
     public boolean getDataEnabled(int subId) {

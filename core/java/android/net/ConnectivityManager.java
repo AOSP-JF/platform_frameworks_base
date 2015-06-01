@@ -909,7 +909,7 @@ public class ConnectivityManager {
             return PhoneConstants.APN_REQUEST_FAILED;
         }
     }
-
+    
     /**
      * Tells the underlying networking system that the caller is finished
      * using the named feature. The interpretation of {@code feature}
@@ -938,7 +938,7 @@ public class ConnectivityManager {
         }
         return 1;
     }
-
+    
     /**
      * Removes the NET_CAPABILITY_NOT_RESTRICTED capability from the given
      * NetworkCapabilities object if all the capabilities it provides are

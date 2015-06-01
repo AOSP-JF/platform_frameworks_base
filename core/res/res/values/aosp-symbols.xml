@@ -51,6 +51,10 @@
     
     <!-- Enabled ESN Tracker -->
     <java-symbol type="bool" name="config_telephony_ESN_Tracker_enabled" />
+        
+    <!-- Package Manager -->
+    <java-symbol type="array" name="config_disabledComponents" />
+    <java-symbol type="array" name="config_forceEnabledComponents" />
     
     <!-- From various Material changes -->
     <java-symbol type="string" name="config_partial_segment_expire_age" />

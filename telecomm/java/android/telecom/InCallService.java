@@ -365,7 +365,7 @@ public abstract class InCallService extends Service {
              *
              * @param videoQuality  The updated peer video quality.
              */
-            //public abstract void onVideoQualityChanged(int videoQuality);
+            public abstract void onVideoQualityChanged(int videoQuality);
 
             /**
              * Handles an update to the total data used for the current session.

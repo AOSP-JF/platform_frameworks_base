@@ -254,7 +254,7 @@ public final class RemoteConnection {
                     VideoProvider videoProvider,
                     CameraCapabilities cameraCapabilities) {}
 
-            //public void onVideoQualityChanged(VideoProvider videoProvider, int videoQuality) {}
+            public void onVideoQualityChanged(VideoProvider videoProvider, int videoQuality) {}
         }
 
         private final IVideoCallback mVideoCallbackDelegate = new IVideoCallback() {
@@ -307,9 +307,9 @@ public final class RemoteConnection {
 
             @Override
             public void changeVideoQuality(int videoQuality) {
-                //for (Listener l : mListeners) {
-                //    l.onVideoQualityChanged(VideoProvider.this, videoQuality);
-                //}
+                for (Listener l : mListeners) {
+                    l.onVideoQualityChanged(VideoProvider.this, videoQuality);
+                }
             }
 
             @Override
