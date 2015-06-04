@@ -748,27 +748,27 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 mDemoWifiState.enabled = show;
                 mWifiSignalController.notifyListeners();
             }
-            //String sims = args.getString("sims");
-            //if (sims != null) {
-            //    int num = Integer.parseInt(sims);
-            //    List<SubscriptionInfo> subs = new ArrayList<SubscriptionInfo>();
-            //    if (num != mMobileSignalControllers.size()) {
-            //        mMobileSignalControllers.clear();
-            //        int start = mSubscriptionManager.getActiveSubscriptionInfoCountMax();
-            //        for (int i = start /* get out of normal index range */; i < start + num; i++) {
-            //            SubscriptionInfo info = new SubscriptionInfo(i, "", i, "", "", 0, 0, "", 0,
-            //                    null, 0, 0, "");
-            //            subs.add(info);
-            //            mMobileSignalControllers.put(i, new MobileSignalController(mContext,
-            //                    mConfig, mHasMobileDataFeature, mPhone, mSignalsChangedCallbacks,
-            //                    mSignalClusters, this, info));
-            //        }
-            //    }
-            //    final int n = mSignalClusters.size();
-            //    for (int i = 0; i < n; i++) {
-            //        mSignalClusters.get(i).setSubs(subs);
-            //    }
-            //}
+            String sims = args.getString("sims");
+            if (sims != null) {
+                int num = Integer.parseInt(sims);
+                List<SubscriptionInfo> subs = new ArrayList<SubscriptionInfo>();
+                if (num != mMobileSignalControllers.size()) {
+                    mMobileSignalControllers.clear();
+                    int start = mSubscriptionManager.getActiveSubscriptionInfoCountMax();
+                    for (int i = start /* get out of normal index range */; i < start + num; i++) {
+                        SubscriptionInfo info = new SubscriptionInfo(i, "", i, "", "", 0, 0, "", 0,
+                                null, 0, 0, "");
+                        subs.add(info);
+                        mMobileSignalControllers.put(i, new MobileSignalController(mContext,
+                                mConfig, mHasMobileDataFeature, mPhone, mSignalsChangedCallbacks,
+                                mSignalClusters, this, info));
+                    }
+                }
+                final int n = mSignalClusters.size();
+                for (int i = 0; i < n; i++) {
+                    mSignalClusters.get(i).setSubs(subs);
+                }
+            }
             String nosim = args.getString("nosim");
             if (nosim != null) {
                 boolean show = nosim.equals("show");
