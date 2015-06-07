@@ -619,7 +619,7 @@ public final class AssetManager implements AutoCloseable {
 
     private native final int addAssetPathNative(String path);
 
-     /**
+    /**
      * Add a set of assets to overlay an already added set of assets.
      *
      * This is only intended for application resources. System wide resources
@@ -627,7 +627,20 @@ public final class AssetManager implements AutoCloseable {
      *
      * {@hide}
      */
-    public native final int addOverlayPath(String idmapPath);
+    public final int addOverlayPath(String idmapPath) {
+        synchronized (this) {
+            int res = addOverlayPathNative(idmapPath);
+            makeStringBlocks(mStringBlocks);
+            return res;
+        }
+    }
+
+    /**
+     * See addOverlayPath.
+     *
+     * {@hide}
+     */
+    public native final int addOverlayPathNative(String idmapPath);
 
     /**
      * Add multiple sets of assets to the asset manager at once.  See

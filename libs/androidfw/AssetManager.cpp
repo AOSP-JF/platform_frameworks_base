@@ -295,6 +295,10 @@ bool AssetManager::addOverlayPath(const String8& packagePath, int32_t* cookie)
 #endif
     mAssetPaths.add(oap);
     *cookie = static_cast<int32_t>(mAssetPaths.size());
+    
+    if (mResources != NULL) {
+        appendPathToResTable(oap);
+    }
 
     return true;
  }
@@ -601,6 +605,10 @@ FileType AssetManager::getFileType(const char* fileName)
 }
 
 bool AssetManager::appendPathToResTable(const asset_path& ap) const {
+    // skip those ap's that correspond to system overlays
+    if (ap.isSystemOverlay) {
+        return true;
+    }
     Asset* ass = NULL;
     ResTable* sharedRes = NULL;
     bool shared = true;
@@ -786,6 +794,7 @@ void AssetManager::addSystemOverlays(const char* pathOverlaysList,
         oap.path = String8(buf, space - buf);
         oap.type = kFileTypeRegular;
         oap.idmap = String8(space + 1, newline - space - 1);
+        oap.isSystemOverlay = true;
 
         Asset* oass = const_cast<AssetManager*>(this)->
             openNonAssetInPathLocked("resources.arsc",
