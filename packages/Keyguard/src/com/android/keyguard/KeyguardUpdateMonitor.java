@@ -241,16 +241,19 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             }
         }
         List<SubscriptionInfo> subscriptionInfos = getSubscriptionInfo(true /* forceReload */);
-        
         // Hack level over 9000: Because the subscription id is not yet valid when we see the
         // first update in handleSimStateChange, we need to force refresh all all SIM states
         // so the subscription id for them is consistent.
+        ArrayList<SubscriptionInfo> changedSubscriptions = new ArrayList<>();
         for (int i = 0; i < subscriptionInfos.size(); i++) {
             SubscriptionInfo info = subscriptionInfos.get(i);
-            refreshSimState(info.getSubscriptionId(), info.getSimSlotIndex());
+            boolean changed = refreshSimState(info.getSubscriptionId(), info.getSimSlotIndex());
+            if (changed) {
+                changedSubscriptions.add(info);
+            }
         }
-        for (int i = 0; i < subscriptionInfos.size(); i++) {
-            SimData data = mSimDatas.get(mSubscriptionInfo.get(i).getSubscriptionId());
+        for (int i = 0; i < changedSubscriptions.size(); i++) {
+            SimData data = mSimDatas.get(changedSubscriptions.get(i).getSubscriptionId());
             for (int j = 0; j < mCallbacks.size(); j++) {
                 KeyguardUpdateMonitorCallback cb = mCallbacks.get(j).get();
                 if (cb != null) {
@@ -258,8 +261,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 }
             }
         }
+        for (int j = 0; j < mCallbacks.size(); j++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(j).get();
+            if (cb != null) {
+                cb.onRefreshCarrierInfo();
+            }
+        }
     }
-
     /** @return List of SubscriptionInfo records, maybe empty but never null */
     List<SubscriptionInfo> getSubscriptionInfo(boolean forceReload) {
         List<SubscriptionInfo> sil = mSubscriptionInfo;
