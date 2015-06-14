@@ -176,36 +176,33 @@ public class CarrierText extends TextView {
         CharSequence carrierText = null;
         StatusMode status = getStatusForIccState(simState);
         switch (status) {
+        /* We have a bug somewhere, the carrier text is not showed correctly. Only showing "No SIM - Carrier name"
+         * Let's disable text for now.
+         */
             case Normal:
-                carrierText = text;
+                carrierText = "";
                 break;
             case SimNotReady:
                 // Null is reserved for denoting missing, in this case we have nothing to display.
                 carrierText = ""; // nothing to display yet.
                 break;
             case NetworkLocked:
-                carrierText = makeCarrierStringOnEmergencyCapable(
-                        mContext.getText(R.string.keyguard_network_locked_message), text);
+                carrierText = "";
                 break;
             case SimMissing:
-                carrierText = null;
+                carrierText = "";
                 break;
             case SimPermDisabled:
-                carrierText = getContext().getText(
-                        R.string.keyguard_permanent_disabled_sim_message_short);
+                carrierText = "";
                 break;
             case SimMissingLocked:
-                carrierText = null;
+                carrierText = "";
                 break;
             case SimLocked:
-                carrierText = makeCarrierStringOnEmergencyCapable(
-                        getContext().getText(R.string.keyguard_sim_locked_message),
-                        text);
+                carrierText = "";
                 break;
             case SimPukLocked:
-                carrierText = makeCarrierStringOnEmergencyCapable(
-                        getContext().getText(R.string.keyguard_sim_puk_locked_message),
-                        text);
+                carrierText = "";
                 break;
         }
         return carrierText;
