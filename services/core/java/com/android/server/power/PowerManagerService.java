@@ -147,6 +147,9 @@ public final class PowerManagerService extends SystemService
     // Power hints defined in hardware/libhardware/include/hardware/power.h.
     private static final int POWER_HINT_INTERACTION = 2;
     private static final int POWER_HINT_LOW_POWER = 5;
+    
+    // Button backlight duration
+    private static final int BUTTON_ON_DURATION = 5 * 1000;
 
     private final Context mContext;
     private final ServiceThread mHandlerThread;
@@ -163,6 +166,7 @@ public final class PowerManagerService extends SystemService
     private SettingsObserver mSettingsObserver;
     private DreamManagerInternal mDreamManager;
     private Light mAttentionLight;
+    private Light mButtonsLight;
 
     private final Object mLock = new Object();
 
@@ -510,6 +514,7 @@ public final class PowerManagerService extends SystemService
 
             mLightsManager = getLocalService(LightsManager.class);
             mAttentionLight = mLightsManager.getLight(LightsManager.LIGHT_ID_ATTENTION);
+            mButtonsLight = mLightsManager.getLight(LightsManager.LIGHT_ID_BUTTONS);
 
             // Initialize display power management.
             mDisplayManagerInternal.initPowerManagement(
@@ -1457,6 +1462,12 @@ public final class PowerManagerService extends SystemService
                     nextTimeout = mLastUserActivityTime
                             + screenOffTimeout - screenDimDuration;
                     if (now < nextTimeout) {
+                        if (now > mLastUserActivityTime + BUTTON_ON_DURATION) {
+                            mButtonsLight.setBrightness(0);
+                        } else {
+                            mButtonsLight.setBrightness(mDisplayPowerRequest.screenBrightness);
+                            nextTimeout = now + BUTTON_ON_DURATION;
+                        }
                         mUserActivitySummary = USER_ACTIVITY_SCREEN_BRIGHT;
                     } else {
                         nextTimeout = mLastUserActivityTime + screenOffTimeout;
