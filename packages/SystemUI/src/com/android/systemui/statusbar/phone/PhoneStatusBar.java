@@ -1243,10 +1243,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     private void addHeadsUpView() {
-        if (mHeadsUpNotificationView != null && mHeadsUpNotificationView.isAttachedToWindow()) {
-            return;
-        }
-
         int headsUpHeight = mContext.getResources()
                 .getDimensionPixelSize(R.dimen.heads_up_window_height);
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
@@ -1265,10 +1261,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         lp.packageName = mContext.getPackageName();
         lp.windowAnimations = R.style.Animation_StatusBar_HeadsUp;
 
-        if(mHeadsUpNotificationView.getWindowToken() == null) {
-            mWindowManager.addView(mHeadsUpNotificationView, lp);
-        }
+        mWindowManager.addView(mHeadsUpNotificationView, lp);
     }
+
 
     private void removeHeadsUpView() {
         mWindowManager.removeView(mHeadsUpNotificationView);
