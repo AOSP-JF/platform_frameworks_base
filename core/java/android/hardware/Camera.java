@@ -191,7 +191,7 @@ public class Camera {
     private CameraDataCallback mCameraDataCallback;
     private CameraMetaDataCallback mCameraMetaDataCallback;
     /* ### QC ADD-ONS: END */
-    //private Binder mTorchToken;
+    private Binder mTorchToken;
 
     /**
      * Broadcast Action:  A new picture is taken by the camera, and the entry of
@@ -478,7 +478,7 @@ public class Camera {
         mCameraDataCallback = null;
         mCameraMetaDataCallback = null;
         /* ### QC ADD-ONS: END */
-        //mTorchToken = new Binder();
+        mTorchToken = new Binder();
 
         Looper looper;
         if ((looper = Looper.myLooper()) != null) {
@@ -494,7 +494,7 @@ public class Camera {
             packageName = "android";
         }
 
-        //notifyTorch(true);
+        notifyTorch(true);
         return native_setup(new WeakReference<Camera>(this), cameraId, halVersion, packageName);
     }
 
@@ -557,19 +557,21 @@ public class Camera {
     Camera() {
     }
 
-    //private void notifyTorch(boolean inUse) {
-    //    IBinder b = ServiceManager.getService(Context.TORCH_SERVICE);
-    //    ITorchService torchService = ITorchService.Stub.asInterface(b);
-    //    try {
-    //        if (inUse) {
-    //            torchService.onCameraOpened(mTorchToken, mCameraId);
-    //        } else {
-    //            torchService.onCameraClosed(mTorchToken, mCameraId);
-    //        }
-    //    } catch (RemoteException e) {
-    //        // Ignore
-    //    }
-    //}
+    private void notifyTorch(boolean inUse) {
+        IBinder b = ServiceManager.getService(Context.TORCH_SERVICE);
+        ITorchService torchService = ITorchService.Stub.asInterface(b);
+        if (torchService != null) {
+            try {
+                if (inUse) {
+                    torchService.onCameraOpened(mTorchToken, mCameraId);
+                } else {
+                    torchService.onCameraClosed(mTorchToken, mCameraId);
+                }
+            } catch (RemoteException e) {
+                // Ignore
+            }
+        }
+    }
 
     @Override
     protected void finalize() {
@@ -588,9 +590,9 @@ public class Camera {
      * <p>You must call this as soon as you're done with the Camera object.</p>
      */
     public final void release() {
+        notifyTorch(false);
         native_release();
         mFaceDetectionRunning = false;
-        //notifyTorch(false);
     }
 
     /**
@@ -1642,6 +1644,20 @@ public class Camera {
     }
 
     private native final boolean _enableShutterSound(boolean enabled);
+
+    /**
+     * Send a vendor-specific camera command
+     *
+     * @hide
+     */
+    public final void sendVendorCommand(int cmd, int arg1, int arg2) {
+        if (cmd < 1000) {
+            throw new IllegalArgumentException("Command numbers must be at least 1000");
+        }
+        _sendVendorCommand(cmd, arg1, arg2);
+    }
+
+    private native final void _sendVendorCommand(int cmd, int arg1, int arg2);
 
     /**
      * Callback interface for zoom changes during a smooth zoom operation.

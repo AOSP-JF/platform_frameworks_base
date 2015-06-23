@@ -44,6 +44,9 @@
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
     <uses-permission android:name="android.permission.GET_APP_OPS_STATS" />
 
+    <!-- Torch tile -->
+    <uses-permission android:name="android.permission.ACCESS_TORCH_SERVICE" />
+    
     <!-- Networking and telephony -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />

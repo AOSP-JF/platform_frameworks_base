@@ -2914,6 +2914,16 @@ public abstract class Context {
      * @see android.media.projection.ProjectionManager
      */
     public static final String MEDIA_PROJECTION_SERVICE = "media_projection";
+    
+    /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link com.android.server.TorchService} for accessing torch service.
+     *
+     * @see #getSystemService
+     * @see com.android.server.TorchService
+     * @hide
+     */
+    public static final String TORCH_SERVICE = "torch";
 
     /**
      * Determine whether the given permission is allowed for a particular
