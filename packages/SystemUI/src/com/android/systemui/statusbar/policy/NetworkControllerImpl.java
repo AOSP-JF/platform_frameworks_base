@@ -1275,7 +1275,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
             if (action.equals(TelephonyIntents.SPN_STRINGS_UPDATED_ACTION)) {
                 updateNetworkName(intent.getBooleanExtra(TelephonyIntents.EXTRA_SHOW_SPN, false),
                         intent.getStringExtra(TelephonyIntents.EXTRA_SPN),
-                        intent.getStringExtra(TelephonyIntents.EXTRA_DATA_SPN),
                         intent.getBooleanExtra(TelephonyIntents.EXTRA_SHOW_PLMN, false),
                         intent.getStringExtra(TelephonyIntents.EXTRA_PLMN));
                 notifyListenersIfNecessary();
@@ -1304,18 +1303,14 @@ public class NetworkControllerImpl extends BroadcastReceiver
         /**
          * Updates the network's name based on incoming spn and plmn.
          */
-        void updateNetworkName(boolean showSpn, String spn, String dataSpn,
-                boolean showPlmn, String plmn) {
+        void updateNetworkName(boolean showSpn, String spn, boolean showPlmn, String plmn) {
             if (CHATTY) {
-                Log.d("CarrierLabel", "updateNetworkName showSpn=" + showSpn
-                        + " spn=" + spn + " dataSpn=" + dataSpn
+                Log.d("CarrierLabel", "updateNetworkName showSpn=" + showSpn + " spn=" + spn
                         + " showPlmn=" + showPlmn + " plmn=" + plmn);
             }
             StringBuilder str = new StringBuilder();
-            StringBuilder strData = new StringBuilder();
             if (showPlmn && plmn != null) {
                 str.append(plmn);
-                strData.append(plmn);
             }
             if (showSpn && spn != null) {
                 if (str.length() != 0) {
@@ -1327,17 +1322,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 mCurrentState.networkName = str.toString();
             } else {
                 mCurrentState.networkName = mNetworkNameDefault;
-            }
-            if (showSpn && dataSpn != null) {
-                if (strData.length() != 0) {
-                    strData.append(mNetworkNameSeparator);
-                }
-                strData.append(dataSpn);
-            }
-            if (strData.length() != 0) {
-                mCurrentState.networkNameData = strData.toString();
-            } else {
-                mCurrentState.networkNameData = mNetworkNameDefault;
             }
         }
 
