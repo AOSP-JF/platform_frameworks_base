@@ -466,11 +466,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         public State simState;
         public int slotId;
         public int subId;
+
         SimData(State state, int slot, int id) {
             simState = state;
             slotId = slot;
             subId = id;
         }
+
         static SimData fromIntent(Intent intent) {
             State state;
             if (!TelephonyIntents.ACTION_SIM_STATE_CHANGED.equals(intent.getAction())) {
@@ -483,7 +485,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             if (IccCardConstants.INTENT_VALUE_ICC_ABSENT.equals(stateExtra)) {
                 final String absentReason = intent
                     .getStringExtra(IccCardConstants.INTENT_KEY_LOCKED_REASON);
-                    
+
                 if (IccCardConstants.INTENT_VALUE_ABSENT_ON_PERM_DISABLED.equals(
                         absentReason)) {
                     state = IccCardConstants.State.PERM_DISABLED;
@@ -499,13 +501,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                     state = IccCardConstants.State.PIN_REQUIRED;
                 } else if (IccCardConstants.INTENT_VALUE_LOCKED_ON_PUK.equals(lockedReason)) {
                     state = IccCardConstants.State.PUK_REQUIRED;
-                } else if (IccCardConstants.INTENT_VALUE_LOCKED_PERSO.equals(lockedReason)) {
-                    state = IccCardConstants.State.PERSO_LOCKED;
                 } else {
                     state = IccCardConstants.State.UNKNOWN;
                 }
-            } else if (IccCardConstants.INTENT_VALUE_ICC_CARD_IO_ERROR.equals(stateExtra)) {
-                state = IccCardConstants.State.CARD_IO_ERROR;
+            } else if (IccCardConstants.INTENT_VALUE_LOCKED_NETWORK.equals(stateExtra)) {
+                state = IccCardConstants.State.NETWORK_LOCKED;
             } else if (IccCardConstants.INTENT_VALUE_ICC_LOADED.equals(stateExtra)
                         || IccCardConstants.INTENT_VALUE_ICC_IMSI.equals(stateExtra)) {
                 // This is required because telephony doesn't return to "READY" after
@@ -516,10 +516,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             }
             return new SimData(state, slotId, subId);
         }
+
         public String toString() {
             return "SimData{state=" + simState + ",slotId=" + slotId + ",subId=" + subId + "}";
         }
     }
+    
     public static class BatteryStatus {
         public final int status;
         public final int level;
