@@ -57,4 +57,8 @@
     <string name="screenshot_delete_action">Delete</string>
     <string name="screenshot_delete_confirmation">Screenshot deleted.</string>
     
+    <!-- Battery Saver Dimss -->
+    <string name="battery_saver_dismiss_title">Dismiss</string>
+    <string name="battery_saver_notification_action_text_short">Turn off</string>
+
 </resources>
