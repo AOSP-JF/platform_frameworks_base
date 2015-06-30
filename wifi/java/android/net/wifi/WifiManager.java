@@ -2560,29 +2560,4 @@ public class WifiManager {
             return 0;
         }
     }
-
-    /**
-     * Set setting for allowing Scans when infrastructure is associated
-     * @hide
-     */
-    public void setAllowScansWhileAssociated(boolean enabled) {
-        try {
-            mService.setAllowScansWhileAssociated(enabled);
-        } catch (RemoteException e) {
-
-        }
-    }
- 
-    /**
-     * Get setting for allowing Scans when infrastructure is associated
-     * @hide
-     */
-    public boolean getAllowScansWhileAssociated() {
-        try {
-            return mService.getAllowScansWhileAssociated();
-        } catch (RemoteException e) {
-        }
-        return false;
-    }
-
 }
