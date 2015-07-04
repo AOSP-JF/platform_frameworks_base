@@ -93,6 +93,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
     private boolean mAlwaysUseOption;
     private boolean mShowExtended;
     private ListView mListView;
+    private ViewGroup mFilteredItemContainer;
     private Button mAlwaysButton;
     private Button mOnceButton;
     private View mProfileView;
