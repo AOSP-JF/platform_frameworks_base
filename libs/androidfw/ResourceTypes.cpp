@@ -6121,8 +6121,8 @@ status_t ResTable::createIdmap(const ResTable& overlay,
                 if (typeMap.entryMap.insertAt(0xffffffff, index, numItems) < 0) {
                     return NO_MEMORY;
                 }
-                typeMap.entryMap.add(Res_GETENTRY(overlayResID));
             }
+            typeMap.entryMap.add(Res_GETENTRY(overlayResID));
         }
 
         if (!typeMap.entryMap.isEmpty()) {
