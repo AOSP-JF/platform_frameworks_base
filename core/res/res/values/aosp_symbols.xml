@@ -87,5 +87,13 @@
     <java-symbol type="string" name="global_action_screenshot" />
     <java-symbol type="drawable" name="ic_lock_settings" />
     <java-symbol type="drawable" name="ic_lock_user" />
-
+    
+    <!-- config softap extention feature -->
+    <java-symbol type="bool" name="config_softap_extention" />
+    
+    <!-- Tethering -->
+    <java-symbol type="string" name="tethered_notification_no_device_message" />
+    <java-symbol type="string" name="tethered_notification_one_device_message" />
+    <java-symbol type="string" name="tethered_notification_multi_device_message" />
+    
 </resources>
