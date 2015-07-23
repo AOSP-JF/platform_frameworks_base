@@ -21,11 +21,14 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
+import android.widget.PopupMenu;
+
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
@@ -525,7 +528,50 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         Task t = mStack.getTasks().get(mFocusedTaskIndex);
         TaskView tv = getChildViewForTask(t);
-        tv.dismissTask();
+        tv.dismissTask(0L);
+    }
+
+    private boolean dismissAll() {
+        return Settings.System.getInt(mContext.getContentResolver(),
+            Settings.System.RECENTS_CLEAR_ALL_DISMISS_ALL, 1) == 1;
+    }
+    
+    public void dismissAllTasks() {
+        post(new Runnable() {
+            @Override
+            public void run() {
+                ArrayList<Task> tasks = new ArrayList<Task>();
+                tasks.addAll(mStack.getTasks());
+                if (!dismissAll() && tasks.size() > 1) {
+                    // Ignore the visible foreground task
+                    Task foregroundTask = tasks.get(tasks.size() - 1);
+                    tasks.remove(foregroundTask);
+                }
+
+                // Remove visible TaskViews
+                long dismissDelay = 0;
+                int childCount = getChildCount();
+                int delay = mConfig.taskViewRemoveAnimDuration / childCount;
+                if (!dismissAll() && childCount > 1) childCount--;
+                for (int i = 0; i < childCount; i++) {
+                    TaskView tv = (TaskView) getChildAt(i);
+                    tasks.remove(tv.getTask());
+                    tv.dismissTask(dismissDelay);
+                    dismissDelay += delay;
+                }
+
+                int size = tasks.size();
+                if (size > 0) {
+                    // Remove possible alive Tasks
+                    for (int i = 0; i < size; i++) {
+                        Task t = tasks.get(i);
+                        if (mStack.getTasks().contains(t)) {
+                            mStack.removeTask(t);
+                        }
+                    }
+                }
+            }
+        });
     }
 
     /** Resets the focused task. */
@@ -1163,7 +1209,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                         public void run() {
                             mStack.removeTask(t);
                         }
-                    });
+                    }, 0L);
                 } else {
                     // Otherwise, remove the task from the stack immediately
                     mStack.removeTask(t);
