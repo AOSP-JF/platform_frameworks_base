@@ -200,9 +200,6 @@ public class NotificationPanelView extends PanelView implements
             public void onDetailChanged(boolean showing) {
                 mQsPanel.setTopOfContainer(mQsContainer.getTop());
                 mQsPanel.setDetailOffset(mScrollView.getScrollY());
-                if (!showing) {
-                    mHandler.removeCallbacks(mCloseQsRunnable);
-                }
             }
         });
         mClockView = (TextView) findViewById(R.id.clock_view);
@@ -1676,10 +1673,6 @@ public class NotificationPanelView extends PanelView implements
     public void onScrollChanged() {
         mQsPanel.setDetailOffset(mScrollView.getScrollY());
         if (mQsExpanded) {
-            if (isQsDetailShowing()) {
-                mHandler.removeCallbacks(mCloseQsRunnable);
-                mHandler.postDelayed(mCloseQsRunnable, 200);
-            }
             requestScrollerTopPaddingUpdate(false /* animate */);
             requestPanelHeightUpdate();
         }
