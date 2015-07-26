@@ -24,4 +24,8 @@
     needs to be set to false, to prevent the doze notifications from being light -->
     <bool name="config_invert_colors_on_doze">true</bool>
 
+    <!-- Softkeys lights -->
+    <integer name="config_buttonBrightnessSettingDefault">255</integer>
+    <bool name="config_deviceHasVariableButtonBrightness">false</bool>
+
 </resources>
