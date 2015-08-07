@@ -19,6 +19,18 @@
     <java-symbol type="string" name="config_rat_3g" />
     <java-symbol type="string" name="config_rat_4g" />
     
+    <!-- spn display control -->
+    <java-symbol type="bool" name="config_spn_display_control" />
+
+    <!-- monitor locale change -->
+    <java-symbol type="bool" name="config_monitor_locale_change" />
+
+    <!-- display for radio tech -->
+    <java-symbol type="bool" name="config_display_rat" />
+
+    <java-symbol type="array" name="origin_carrier_names" />
+    <java-symbol type="array" name="locale_carrier_names" />
+    
     <!-- Boolean to enable stk functionality on Samsung phones -->
     <java-symbol type="bool" name="config_samsung_stk" />
     
