@@ -195,7 +195,7 @@ public class CarrierText extends TextView {
         StatusMode status = getStatusForIccState(simState);
         switch (status) {
             case Normal:
-                carrierText = "";
+                carrierText = text;
                 break;
 
             case SimNotReady:
@@ -204,27 +204,33 @@ public class CarrierText extends TextView {
                 break;
 
             case NetworkLocked:
-                carrierText = "";
+                carrierText = makeCarrierStringOnEmergencyCapable(
+                        mContext.getText(R.string.keyguard_network_locked_message), text);
                 break;
 
             case SimMissing:
-                carrierText = "";
+                carrierText = null;
                 break;
 
             case SimPermDisabled:
-                carrierText = "";
+                carrierText = getContext().getText(
+                        R.string.keyguard_permanent_disabled_sim_message_short);
                 break;
 
             case SimMissingLocked:
-                carrierText = "";
+                carrierText = null;
                 break;
 
             case SimLocked:
-                carrierText = "";
+                carrierText = makeCarrierStringOnEmergencyCapable(
+                        getContext().getText(R.string.keyguard_sim_locked_message),
+                        text);
                 break;
 
             case SimPukLocked:
-                carrierText = "";
+                carrierText = makeCarrierStringOnEmergencyCapable(
+                        getContext().getText(R.string.keyguard_sim_puk_locked_message),
+                        text);
                 break;
         }
 
