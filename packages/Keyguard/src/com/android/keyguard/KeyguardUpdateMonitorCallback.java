@@ -53,6 +53,13 @@ public class KeyguardUpdateMonitorCallback {
     public void onRefreshCarrierInfo() { }
 
     /**
+     * Called when the airplane mode changes.
+     *
+     * @param on Indicates if the airplane mode is now enable.
+     */
+    void onAirplaneModeChanged(boolean on) { }
+    
+    /**
      * Called when the ringer mode changes.
      * @param state the current ringer state, as defined in
      * {@link AudioManager#RINGER_MODE_CHANGED_ACTION}
@@ -116,9 +123,9 @@ public class KeyguardUpdateMonitorCallback {
     public void onUserSwitchComplete(int userId) { }
 
     /**
-     * Called when the SIM state changes.
-     * @param slotId
+     * Called when the SIM state of a subscription changes.
      * @param simState
+     * @param subId The subscription id which SIM state changed.
      */
     public void onSimStateChanged(int subId, int slotId, IccCardConstants.State simState) { }
 

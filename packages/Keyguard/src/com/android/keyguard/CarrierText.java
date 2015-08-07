@@ -24,8 +24,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.TypedArray;
 import android.net.ConnectivityManager;
+import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.text.method.SingleLineTransformationMethod;
 import android.util.AttributeSet;
@@ -47,16 +49,29 @@ public class CarrierText extends TextView {
     private LockPatternUtils mLockPatternUtils;
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
+    private boolean mDisplayAirplaneMode;
+    private boolean mAirplaneModeActive;
+
     private KeyguardUpdateMonitorCallback mCallback = new KeyguardUpdateMonitorCallback() {
         @Override
         public void onRefreshCarrierInfo() {
             updateCarrierText();
         }
 
+        @Override
+        void onAirplaneModeChanged(boolean on) {
+            mAirplaneModeActive = on;
+            if (mDisplayAirplaneMode) {
+                updateCarrierText();
+            }
+        }
+
+        @Override
         public void onScreenTurnedOff(int why) {
             setSelected(false);
         };
 
+        @Override
         public void onScreenTurnedOn() {
             setSelected(true);
         };
@@ -72,7 +87,8 @@ public class CarrierText extends TextView {
         SimPukLocked, // SIM card is PUK locked because SIM entered wrong too many times
         SimLocked, // SIM card is currently locked
         SimPermDisabled, // SIM card is permanently disabled due to PUK unlock failure
-        SimNotReady; // SIM is not ready yet. May never be on devices w/o a SIM.
+        SimNotReady, // SIM is not ready yet. May never be on devices w/o a SIM.
+        SimIoError; //The sim card is faulty
     }
 
     public CarrierText(Context context) {
@@ -94,6 +110,11 @@ public class CarrierText extends TextView {
     }
 
     protected void updateCarrierText() {
+        if (mDisplayAirplaneMode && mAirplaneModeActive) {
+            setText(com.android.internal.R.string.lockscreen_airplane_mode_on);
+            return;
+        }
+        
         boolean allSimsMissing = true;
         CharSequence displayText = null;
 
@@ -101,13 +122,15 @@ public class CarrierText extends TextView {
         final int N = subs.size();
         if (DEBUG) Log.d(TAG, "updateCarrierText(): " + N);
         for (int i = 0; i < N; i++) {
-            State simState = mKeyguardUpdateMonitor.getSimState(subs.get(i).getSubscriptionId());
+            int subId = subs.get(i).getSubscriptionId();
+            State simState = mKeyguardUpdateMonitor.getSimState(subId);
+            ServiceState serviceState = mKeyguardUpdateMonitor.getServiceState(subId);
             CharSequence carrierName = subs.get(i).getCarrierName();
-            CharSequence carrierTextForSimState = getCarrierTextForSimState(simState, carrierName);
-            if (DEBUG) Log.d(TAG, "Handling " + simState + " " + carrierName);
-            if (carrierTextForSimState != null) {
+            CharSequence carrierTextForState = 
+                    getCarrierTextForState(simState, serviceState, carrierName);
+            if (carrierTextForState != null) {
                 allSimsMissing = false;
-                displayText = concatenate(displayText, carrierTextForSimState);
+                displayText = concatenate(displayText, carrierTextForState, " | ");
             }
         }
         if (allSimsMissing) {
@@ -118,32 +141,16 @@ public class CarrierText extends TextView {
                 // "No SIM card"
                 // Grab the first subscripton, because they all should contain the emergency text,
                 // described above.
+                
                 displayText =  makeCarrierStringOnEmergencyCapable(
                         getContext().getText(R.string.keyguard_missing_sim_message_short),
                         subs.get(0).getCarrierName());
             } else {
                 // We don't have a SubscriptionInfo to get the emergency calls only from.
-                // Grab it from the old sticky broadcast if possible instead. We can use it
-                // here because no subscriptions are active, so we don't have
-                // to worry about MSIM clashing.
-                CharSequence text =
-                        getContext().getText(com.android.internal.R.string.emergency_calls_only);
-                Intent i = getContext().registerReceiver(null,
-                        new IntentFilter(TelephonyIntents.SPN_STRINGS_UPDATED_ACTION));
-                if (i != null) {
-                    String spn = "";
-                    String plmn = "";
-                    if (i.getBooleanExtra(TelephonyIntents.EXTRA_SHOW_SPN, false)) {
-                        spn = i.getStringExtra(TelephonyIntents.EXTRA_SPN);
-                    }
-                    if (i.getBooleanExtra(TelephonyIntents.EXTRA_SHOW_PLMN, false)) {
-                        plmn = i.getStringExtra(TelephonyIntents.EXTRA_PLMN);
-                    }
-                    if (DEBUG) Log.d(TAG, "Getting plmn/spn sticky brdcst " + plmn + "/" + spn);
-                    text = concatenate(plmn, spn);
-                }
+                // Lets just make it ourselves.
                 displayText =  makeCarrierStringOnEmergencyCapable(
-                        getContext().getText(R.string.keyguard_missing_sim_message_short), text);
+                        getContext().getText(R.string.keyguard_missing_sim_message_short),
+                        getContext().getText(com.android.internal.R.string.emergency_calls_only));
             }
         }
         setText(displayText);
@@ -154,6 +161,8 @@ public class CarrierText extends TextView {
         super.onFinishInflate();
         mSeparator = getResources().getString(
                 com.android.internal.R.string.kg_text_message_separator);
+        mDisplayAirplaneMode = getResources().getBoolean(R.bool.config_display_APM);
+
         final boolean screenOn = KeyguardUpdateMonitor.getInstance(mContext).isScreenOn();
         setSelected(screenOn); // Allow marquee to work.
     }
@@ -185,12 +194,12 @@ public class CarrierText extends TextView {
      * and SPN as well as device capabilities, such as being emergency call capable.
      *
      * @param simState
-     * @param text
+     * @param plmn
      * @param spn
-     * @return Carrier text if not in missing state, null otherwise.
+     * @return
      */
-    private CharSequence getCarrierTextForSimState(IccCardConstants.State simState,
-            CharSequence text) {
+    private CharSequence getCarrierTextForState(IccCardConstants.State simState,
+            ServiceState serviceState, CharSequence text) {
         CharSequence carrierText = null;
         StatusMode status = getStatusForIccState(simState);
         switch (status) {
@@ -205,7 +214,7 @@ public class CarrierText extends TextView {
 
             case NetworkLocked:
                 carrierText = makeCarrierStringOnEmergencyCapable(
-                        mContext.getText(R.string.keyguard_network_locked_message), text);
+                        getContext().getText(R.string.keyguard_network_locked_message), text);
                 break;
 
             case SimMissing:
@@ -232,8 +241,27 @@ public class CarrierText extends TextView {
                         getContext().getText(R.string.keyguard_sim_puk_locked_message),
                         text);
                 break;
+            case SimIoError:
+                carrierText = makeCarrierStringOnEmergencyCapable(
+                        getContext().getText(R.string.lockscreen_sim_error_message_short),
+                        text);
+                break;
         }
 
+        //display 2G/3G/4G if operator ask for showing radio tech
+        if (serviceState != null && mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_display_rat)) {
+            int networkType = serviceState.getDataNetworkType();
+            if (networkType == TelephonyManager.NETWORK_TYPE_UNKNOWN) {
+                networkType = serviceState.getVoiceNetworkType();
+            }
+            if (networkType != TelephonyManager.NETWORK_TYPE_UNKNOWN) {
+                TelephonyManager tm = TelephonyManager.from(mContext);
+                carrierText = carrierText + " " + tm.networkTypeToString(networkType);
+            }
+        }
+
+        if (DEBUG) Log.d(TAG, "getCarrierTextForSimState: carrierText=" + carrierText);
         return carrierText;
     }
 
@@ -281,18 +309,25 @@ public class CarrierText extends TextView {
                 return StatusMode.SimPermDisabled;
             case UNKNOWN:
                 return StatusMode.SimMissing;
+            case CARD_IO_ERROR:
+                return StatusMode.SimIoError;
         }
         return StatusMode.SimMissing;
     }
 
     private static CharSequence concatenate(CharSequence plmn, CharSequence spn) {
+        return concatenate(plmn, spn, mSeparator);
+    }
+
+    private static CharSequence concatenate(CharSequence plmn, CharSequence spn,
+            CharSequence separator) {
         final boolean plmnValid = !TextUtils.isEmpty(plmn);
         final boolean spnValid = !TextUtils.isEmpty(spn);
         if (plmnValid && spnValid) {
             if (plmn.equals(spn)) {
                 return plmn;
             } else {
-                return new StringBuilder().append(plmn).append(mSeparator).append(spn).toString();
+                return new StringBuilder().append(plmn).append(separator).append(spn).toString();
             }
         } else if (plmnValid) {
             return plmn;
