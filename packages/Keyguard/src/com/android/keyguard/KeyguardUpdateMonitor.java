@@ -128,7 +128,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     
     private SubscriptionManager mSubscriptionManager;
     private List<SubscriptionInfo> mSubscriptionInfo;
-    private int mNumPhones;
     
     private int mRingMode;
     private int mPhoneState;
@@ -1344,13 +1343,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             }
         }
         return resultId;
-    }
-    
-    public int getNumPhones() {
-        if (mNumPhones == 0) {
-            mNumPhones = TelephonyManager.getDefault().getPhoneCount();
-        }
-        return mNumPhones;
     }
     
     public SubscriptionInfo getSubscriptionInfoForSubId(int subId) {
