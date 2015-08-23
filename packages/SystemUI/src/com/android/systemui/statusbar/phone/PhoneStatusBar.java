@@ -3268,10 +3268,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         wm.forgetLoadedKeyguardWallpaper();
         mKeyguardWallpaper = wm.getKeyguardBitmap();
         updateMediaMetaData(true);
-
-        if (mNavigationBarView != null) {
-            mNavigationBarView.updateSettings();
-        }
     }
 
     private void setControllerUsers() {
