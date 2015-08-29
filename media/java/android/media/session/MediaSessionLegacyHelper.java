@@ -64,10 +64,8 @@ public class MediaSessionLegacyHelper {
 
     private MediaSessionLegacyHelper(Context context) {
         mContext = context;
-        if (mSessionManager != null) {
         mSessionManager = (MediaSessionManager) context
                 .getSystemService(Context.MEDIA_SESSION_SERVICE);
-        }
     }
 
     public static MediaSessionLegacyHelper getHelper(Context context) {
