@@ -516,9 +516,10 @@ public class RingtoneManager {
             }
             return query(
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, MEDIA_COLUMNS,
-                    constructBooleanTrueWhereClause(mFilterColumns), null,
-                    MediaStore.Audio.Media.DEFAULT_SORT_ORDER)
-                : null;
+                    whereClause, null,
+                    MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+        }
+        return null;
     }
     
     private void setFilterColumnsList(int type) {
