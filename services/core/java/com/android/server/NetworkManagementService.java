@@ -1543,8 +1543,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         };
         try {
             totalStats = mStatsFactory.readNetworkStatsSummaryDev();
-            if(ipaTetherStats != null)totalStats.combineAllValues(ipaTetherStats);
-            Slog.d(TAG,"getNetworkStatsSummaryDev:"+totalStats);
+            if (ipaTetherStats != null) totalStats.combineAllValues(ipaTetherStats);
+            if (DBG) Slog.d(TAG,"getNetworkStatsSummaryDev:"+totalStats);
             return totalStats;
         } catch (IOException e) {
             throw new IllegalStateException(e);
@@ -1562,8 +1562,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         };
         try {
             totalStats = mStatsFactory.readNetworkStatsSummaryXt();
-            if(ipaTetherStats != null) totalStats.combineAllValues(ipaTetherStats);
-            Slog.d(TAG,"getNetworkStatsSummaryXt:"+totalStats);
+            if (ipaTetherStats != null) totalStats.combineAllValues(ipaTetherStats);
+            if (DBG) Slog.d(TAG,"getNetworkStatsSummaryXt:"+totalStats);
             return totalStats;
         } catch (IOException e) {
             throw new IllegalStateException(e);
