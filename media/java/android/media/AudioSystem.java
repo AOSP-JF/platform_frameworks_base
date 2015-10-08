@@ -257,6 +257,7 @@ public class AudioSystem
     public static final int DEVICE_OUT_FM = 0x100000;
     public static final int DEVICE_OUT_AUX_LINE = 0x200000;
     public static final int DEVICE_OUT_SPEAKER_SAFE = 0x400000;
+    public static final int DEVICE_OUT_PROXY = 0x2000000;
 
     public static final int DEVICE_OUT_DEFAULT = DEVICE_BIT_DEFAULT;
 
@@ -283,6 +284,7 @@ public class AudioSystem
                                               DEVICE_OUT_FM |
                                               DEVICE_OUT_AUX_LINE |
                                               DEVICE_OUT_SPEAKER_SAFE |
+                                              DEVICE_OUT_PROXY |
                                               DEVICE_OUT_DEFAULT);
     public static final int DEVICE_OUT_ALL_A2DP = (DEVICE_OUT_BLUETOOTH_A2DP |
                                                    DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES |
@@ -376,6 +378,7 @@ public class AudioSystem
     public static final String DEVICE_OUT_FM_NAME = "fm_transmitter";
     public static final String DEVICE_OUT_AUX_LINE_NAME = "aux_line";
     public static final String DEVICE_OUT_SPEAKER_SAFE_NAME = "speaker_safe";
+    public static final String DEVICE_OUT_PROXY_NAME = "proxy";
 
     public static final String DEVICE_IN_COMMUNICATION_NAME = "communication";
     public static final String DEVICE_IN_AMBIENT_NAME = "ambient";
@@ -446,6 +449,8 @@ public class AudioSystem
             return DEVICE_OUT_AUX_LINE_NAME;
         case DEVICE_OUT_SPEAKER_SAFE:
             return DEVICE_OUT_SPEAKER_SAFE_NAME;
+        case DEVICE_OUT_PROXY:
+            return DEVICE_OUT_PROXY_NAME;
         case DEVICE_OUT_DEFAULT:
         default:
             return Integer.toString(device);
