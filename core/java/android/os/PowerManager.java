@@ -18,10 +18,7 @@ package android.os;
 
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.text.TextUtils;
 import android.util.Log;
 
 /**
@@ -371,35 +368,9 @@ public final class PowerManager {
      */
     public static final String REBOOT_RECOVERY = "recovery";
     
-    /**
-     * Power save profile
-     * @hide
-     */
-    public static final String PROFILE_POWER_SAVE = "0";
-
-    /**
-     * Balanced power profile
-     * @hide
-     */
-    public static final String PROFILE_BALANCED = "1";
-
-    /**
-     * High-performance profile
-     * @hide
-     */
-    public static final String PROFILE_HIGH_PERFORMANCE = "2";
-
-    /**
-     * Broadcast sent when profile is changed
-     * @hide
-     */
-    public static final String POWER_PROFILE_CHANGED =
-            "com.cyanogenmod.power.PROFILE_CHANGED";
-
     final Context mContext;
     final IPowerManager mService;
     final Handler mHandler;
-    private final boolean mHasPowerProfilesSupport;
 
     /**
      * {@hide}
@@ -408,10 +379,6 @@ public final class PowerManager {
         mContext = context;
         mService = service;
         mHandler = handler;
-
-        mHasPowerProfilesSupport = !TextUtils.isEmpty(getDefaultPowerProfile()) &&
-                !TextUtils.isEmpty(mContext.getResources().getString(
-                        com.android.internal.R.string.config_perf_profile_prop));
     }
 
     /**
@@ -868,40 +835,6 @@ public final class PowerManager {
     }
 
     /**
-     * Boost the CPU. Boosts the cpu for the given duration in microseconds.
-     * Requires the {@link android.Manifest.permission#CPU_BOOST} permission.
-     *
-     * @param duration in microseconds to boost the CPU
-     *
-     * @hide
-     */
-    public void cpuBoost(int duration)
-    {
-        try {
-            if (mService != null) {
-                mService.cpuBoost(duration);
-            }
-        } catch (RemoteException e) {
-        }
-    }
-
-    /**
-     * Boost the CPU for an application launch.
-     * Requires the {@link android.Manifest.permission#CPU_BOOST} permission.
-     *
-     * @hide
-     */
-    public void launchBoost()
-    {
-        try {
-            if (mService != null) {
-                mService.launchBoost();
-            }
-        } catch (RemoteException e) {
-        }
-    }
-
-    /**
      * Intent that is broadcast when the state of {@link #isPowerSaveMode()} changes.
      * This broadcast is only sent to registered receivers.
      */
@@ -921,89 +854,6 @@ public final class PowerManager {
 
     /** @hide */
     public static final String EXTRA_POWER_SAVE_MODE = "mode";
-
-    /**
-     * True if the system supports power profiles
-     *
-     * @hide
-     */
-    public boolean hasPowerProfiles() {
-        return mHasPowerProfilesSupport;
-    }
-
-    /**
-     * Gets the default power profile for the device.
-     *
-     * Returns null if not enabled.
-     *
-     * @hide
-     */
-    public String getDefaultPowerProfile() {
-        return mContext.getResources().getString(
-                com.android.internal.R.string.config_perf_profile_default_entry);
-    }
-
-    /**
-     * Set the system power profile
-     *
-     * @throws IllegalArgumentException if invalid
-     * @hide
-     */
-    public boolean setPowerProfile(String profile) {
-        if (!hasPowerProfiles()) {
-            throw new IllegalArgumentException("Power profiles not enabled on this system!");
-        }
-
-        boolean changed = false;
-        try {
-            if (mService != null) {
-                changed = mService.setPowerProfile(profile);
-            }
-        } catch (RemoteException e) {
-            throw new IllegalArgumentException(e);
-        }
-        return changed;
-    }
-
-    /**
-     * Gets the current power profile
-     *
-     * Returns null if power profiles are not enabled
-     * @hide
-     */
-    public String getPowerProfile() {
-        String ret = null;
-        if (hasPowerProfiles()) {
-            try {
-                if (mService != null) {
-                    ret = mService.getPowerProfile();
-                }
-            } catch (RemoteException e) {
-                // nothing
-            }
-        }
-        return ret;
-    }
-
-    /**
-     * Update profile for resumed app, called from ActivityStack
-     * @hide
-     */
-    public void activityResumed(Intent intent) {
-        String ret = null;
-        if (hasPowerProfiles()) {
-            try {
-                if (intent != null && mService != null) {
-                    ComponentName cn = intent.getComponent();
-                    if (cn != null) {
-                        mService.activityResumed(cn.flattenToString());
-                    }
-                }
-            } catch (RemoteException e) {
-                // nothing
-            }
-        }
-    }
 
     /**
      * A wake lock is a mechanism to indicate that your application needs
